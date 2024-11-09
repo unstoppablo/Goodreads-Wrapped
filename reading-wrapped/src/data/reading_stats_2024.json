@@ -1,0 +1,240 @@
+{
+  "Time Period": {
+    "start": "2024-01-01",
+    "end": "2024-12-31"
+  },
+  "Basic Statistics": {
+    "total_books": 19,
+    "total_pages": 6458,
+    "estimated_words": 1614500,
+    "estimated_hours": 269.0833333333333,
+    "estimated_days": 11.211805555555555
+  },
+  "Rating Statistics": {
+    "average_rating": 3.210526315789474,
+    "rating_distribution": {
+      "2": 3,
+      "3": 11,
+      "4": 3,
+      "5": 2
+    }
+  },
+  "Reading Patterns": {
+    "books_per_month": {
+      "2024-01": 3,
+      "2024-02": 1,
+      "2024-03": 2,
+      "2024-04": 3,
+      "2024-05": 1,
+      "2024-06": 3,
+      "2024-07": 1,
+      "2024-08": 2,
+      "2024-09": 1,
+      "2024-10": 2
+    },
+    "average_days_to_finish": 14.947368421052634
+  },
+  "Time Comparisons": [
+    "Watching the entire Lord of the Rings trilogy 23.6 times (precious!)",
+    "Binging all seasons of The Office (US) 3.7 times!",
+    "Taking 17.9 flights from NY to LA <airplane emoji>",
+    "Listening to Taylor Swift's entire discography 16.8 times (we're never ever getting that time back!)",
+    "Playing 'Baby Shark' 10763.3 times (doo doo doo doo doo doo... sorry!)",
+    "The International Space Station could orbit Earth 179.4 times (assuming its not flat <emoji here of eyes>)",
+    "Running 59.8 marathons at an average pace of 4.5 hours (no couch potatoes here!)",
+    "A beaver could build 13.5 dams (damn!)"
+  ],
+  "Book Extremes": {
+    "longest_book": {
+      "title": "La sombra del viento",
+      "author": "Carlos Ruiz Zafón",
+      "pages": 569,
+      "rating": 3.0,
+      "review": "7/10.<br/><br/>I read this book the summer after I finished high school. I decided to reread it this year to see how it held up 6 years later (d@mn). To my surprise, I rate it the exact same.<br/><br/>It has an extremely strong and captivating start, muddled with spells that are uninteresting or somewhat tedious.  Despite being almost 600 pages long, the final act seems very rushed. The writing at many points feels very cheesy too.<br/><br/>Regardless, it’s a good story. I would have trimmed may..."
+    },
+    "shortest_book": {
+      "title": "El pozo",
+      "author": "Juan Carlos Onetti",
+      "pages": 96,
+      "rating": 3.0,
+      "review": "Great writing, confusing and with some unlikeable narrator moments. I need to reread it before EOY. "
+    }
+  },
+  "Highest and Lowest Rated": {
+    "highest_rated": [
+      {
+        "Title": "Cloud Atlas",
+        "Author": "David Mitchell",
+        "My Rating": 5.0,
+        "My Review": "Not only is it a beautifully written book, a masterpiece of narration and writing styles, but it is one of the most unique premises ever. I am so happy I decided to reread this after almost half a decade. Without a doubt, this is one of the best books I have ever read. A marvel of literature.<br/><br/>100/10. "
+      },
+      {
+        "Title": "Pachinko",
+        "Author": "Min Jin Lee",
+        "My Rating": 5.0,
+        "My Review": "One of the best books I have ever read. The captivating storytelling across generations is unlike anything else I’ve ever seen. I cared for every single character, and every single character felt alive and unique. At no point whatsoever did I get bored of the book, or think that something could have been better. <br/><br/>The book captivated me, shocked me, and left me wanting to start all over again. I felt like I was about to tear up at times. <br/><br/>Without a doubt, this is a masterpiece a..."
+      }
+    ],
+    "lowest_rated": [
+      {
+        "Title": "Mexican Gothic",
+        "Author": "Silvia Moreno-Garcia",
+        "My Rating": 2.0,
+        "My Review": "5-5.5/10<br/><br/>The premise is really interesting until you discover what is truly going on. Then it’s just stupid. <br/><br/>The writing at many points tries to be dramatic in a way that reads like a teenage novel. In general it lacks depth, both in prose and general storytelling. <br/><br/>A lot of things are not explained—that’s fine, usually, but here it just seems like they truly didn’t know how to and decided to just end the book while shrugging “eh who knows, right?” <br/><br/>Would nev..."
+      },
+      {
+        "Title": "The Temple of Dawn (The Sea of Fertility, #3)",
+        "Author": "Yukio Mishima",
+        "My Rating": 2.0,
+        "My Review": "The only thing that saved this book from being ranked as 1 star is the amazing start and ~80 ish first pages. After that, it’s countless chapters of yapping, weird horny moments, and down right weird parts that would simply not fly in the last 3 decades almost anywhere in the world.<br/><br/>It’s a shame. The first book is a masterpiece. The second one is really good. But you can see the sharp decline in this one. I’ll still finish the tetralogy at some point this year, but definitely disappoint..."
+      },
+      {
+        "Title": "Things Fall Apart (The African Trilogy, #1)",
+        "Author": "Chinua Achebe",
+        "My Rating": 2.0,
+        "My Review": "I decided to reread this with the hopes that I could appreciate it more than my high school self did. And I did! But still not enough.<br/><br/>The world building is great and the story itself is really interesting. However, the writing style was just not for me. A lot of times it really was a h@ssle to keep reading.<br/><br/>The ending of the book is really strong though. <br/><br/>Overall, 5/10, maybe a 6. <br/>"
+      }
+    ]
+  },
+  "Monthly Reading Pattern": {
+    "2024-01": 3,
+    "2024-02": 1,
+    "2024-03": 2,
+    "2024-04": 3,
+    "2024-05": 1,
+    "2024-06": 3,
+    "2024-07": 1,
+    "2024-08": 2,
+    "2024-09": 1,
+    "2024-10": 2
+  },
+  "Monthly Rating Distribution": {
+    "2024-01": {
+      "distribution": {
+        "2": 0,
+        "3": 3,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-02": {
+      "distribution": {
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 1
+      },
+      "average": 5.0
+    },
+    "2024-03": {
+      "distribution": {
+        "2": 0,
+        "3": 1,
+        "4": 1,
+        "5": 0
+      },
+      "average": 3.5
+    },
+    "2024-04": {
+      "distribution": {
+        "2": 1,
+        "3": 0,
+        "4": 2,
+        "5": 0
+      },
+      "average": 3.3333333333333335
+    },
+    "2024-05": {
+      "distribution": {
+        "2": 0,
+        "3": 1,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-06": {
+      "distribution": {
+        "2": 1,
+        "3": 1,
+        "4": 0,
+        "5": 1
+      },
+      "average": 3.3333333333333335
+    },
+    "2024-07": {
+      "distribution": {
+        "2": 0,
+        "3": 1,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-08": {
+      "distribution": {
+        "2": 0,
+        "3": 2,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-09": {
+      "distribution": {
+        "2": 0,
+        "3": 1,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-10": {
+      "distribution": {
+        "2": 1,
+        "3": 1,
+        "4": 0,
+        "5": 0
+      },
+      "average": 2.5
+    }
+  },
+  "Top Books Summary": [
+    {
+      "title": "Pachinko",
+      "author": "Min Jin Lee",
+      "rating": 5,
+      "pages": 537,
+      "date_read": "2024-02-22"
+    },
+    {
+      "title": "Cloud Atlas",
+      "author": "David Mitchell",
+      "rating": 5,
+      "pages": 509,
+      "date_read": "2024-06-29"
+    },
+    {
+      "title": "Runaway Horses (The Sea of Fertility, #2)",
+      "author": "Yukio Mishima",
+      "rating": 4,
+      "pages": 421,
+      "date_read": "2024-04-10"
+    },
+    {
+      "title": "Last Summer in the City",
+      "author": "Gianfranco Calligarich",
+      "rating": 4,
+      "pages": 192,
+      "date_read": "2024-03-04"
+    },
+    {
+      "title": "Come Closer",
+      "author": "Sara Gran",
+      "rating": 4,
+      "pages": 168,
+      "date_read": "2024-04-11"
+    }
+  ]
+}
