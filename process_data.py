@@ -396,3 +396,4 @@ if __name__ == "__main__":
     )
 
     export_to_json(stats, 'reading_stats_2024.json')
+    print_statistics(stats)
