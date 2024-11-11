@@ -62,26 +62,6 @@ class GoodreadsDataProcessor:
             
         return review
 
-    def get_monthly_reading_pattern(self, start_date=None, end_date=None):
-        """
-        Get number of books finished per month in the specified date range
-        Returns: Dictionary with months as keys and book counts as values
-        """
-        df_period = self._filter_date_range(start_date, end_date)
-        
-        # Group by year and month, count books
-        monthly_counts = df_period.groupby([
-            df_period['Date Read'].dt.year,
-            df_period['Date Read'].dt.month
-        ]).size()
-        
-        # Format the results into a more readable dictionary
-        formatted_counts = {}
-        for (year, month), count in monthly_counts.items():
-            month_name = datetime(year, month, 1).strftime('%Y-%m')
-            formatted_counts[month_name] = count
-            
-        return formatted_counts
 
     def get_monthly_rating_distribution(self, start_date=None, end_date=None):
         """
@@ -252,7 +232,6 @@ class GoodreadsDataProcessor:
         }
 
         stats.update({
-            "Monthly Reading Pattern": self.get_monthly_reading_pattern(start_date, end_date),
             "Monthly Rating Distribution": self.get_monthly_rating_distribution(start_date, end_date),
             "Top Books Summary": self.get_top_books_summary(start_date, end_date)
         })
@@ -317,13 +296,7 @@ def print_statistics(stats):
     print("\nBooks Read per Month:")
     for month, count in patterns['books_per_month'].items():
         print(f"  {month}: {count} book(s)")
-       
-    print("\n=== MONTHLY READING PATTERN ===")
-    monthly_pattern = stats['Monthly Reading Pattern']
-    max_books = max(monthly_pattern.values()) if monthly_pattern else 0
-    for month, count in monthly_pattern.items():
-        bar = "📚" * count
-        print(f"{month:<7}: {bar:<{max_books*3}} ({count} books)")
+
 
     print("\n=== MONTHLY RATING DISTRIBUTION ===")
     monthly_ratings = stats['Monthly Rating Distribution']
