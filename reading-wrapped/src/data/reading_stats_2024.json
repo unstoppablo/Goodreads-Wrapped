@@ -1,16 +1,16 @@
 {
-  "Time Period": {
+  "Time_Period": {
     "start": "2024-01-01",
     "end": "2024-12-31"
   },
-  "Basic Statistics": {
+  "Basic_Statistics": {
     "total_books": 19,
     "total_pages": 6458,
     "estimated_words": 1614500,
     "estimated_hours": 269.0833333333333,
     "estimated_days": 11.211805555555555
   },
-  "Rating Statistics": {
+  "Rating_Statistics": {
     "average_rating": 3.210526315789474,
     "rating_distribution": {
       "2": 3,
@@ -19,7 +19,7 @@
       "5": 2
     }
   },
-  "Reading Patterns": {
+  "Reading_Patterns": {
     "books_per_month": {
       "2024-01": 3,
       "2024-02": 1,
@@ -34,7 +34,7 @@
     },
     "average_days_to_finish": 14.947368421052634
   },
-  "Time Comparisons": [
+  "Time_Comparisons": [
     "Watching the entire Lord of the Rings trilogy 23.6 times (precious!)",
     "Binging all seasons of The Office (US) 3.7 times!",
     "Taking 17.9 flights from NY to LA <airplane emoji>",
@@ -44,7 +44,7 @@
     "Running 59.8 marathons at an average pace of 4.5 hours (no couch potatoes here!)",
     "A beaver could build 13.5 dams (damn!)"
   ],
-  "Book Extremes": {
+  "Book_Extremes": {
     "longest_book": {
       "title": "La sombra del viento",
       "author": "Carlos Ruiz Zafón",
@@ -95,18 +95,6 @@
         "My Review": "I decided to reread this with the hopes that I could appreciate it more than my high school self did. And I did! But still not enough.<br/><br/>The world building is great and the story itself is really interesting. However, the writing style was just not for me. A lot of times it really was a h@ssle to keep reading.<br/><br/>The ending of the book is really strong though. <br/><br/>Overall, 5/10, maybe a 6. <br/>"
       }
     ]
-  },
-  "Monthly Reading Pattern": {
-    "2024-01": 3,
-    "2024-02": 1,
-    "2024-03": 2,
-    "2024-04": 3,
-    "2024-05": 1,
-    "2024-06": 3,
-    "2024-07": 1,
-    "2024-08": 2,
-    "2024-09": 1,
-    "2024-10": 2
   },
   "Monthly Rating Distribution": {
     "2024-01": {
