@@ -62,7 +62,6 @@ class GoodreadsDataProcessor:
             
         return review
 
-
     def get_monthly_rating_distribution(self, start_date=None, end_date=None):
         """
         Get rating distribution per month
@@ -115,6 +114,26 @@ class GoodreadsDataProcessor:
             'date_read': row['Date Read'].strftime('%Y-%m-%d')
         } for _, row in top_books.iterrows()]
 
+    def get_all_books_read(self, start_date=None, end_date=None):
+        """
+        Get details for all books read in the specified period
+        Returns: List of dictionaries containing book details
+        """
+        df_period = self._filter_date_range(start_date, end_date)
+        
+        # Sort by date read (descending)
+        sorted_books = df_period.sort_values('Date Read', ascending=False)
+        
+        return [{
+            'title': row['Title'],
+            'author': row['Author'],
+            'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
+            'pages': int(row['Number of Pages']) if pd.notna(row['Number of Pages']) else None,
+            'date_read': row['Date Read'].strftime('%Y-%m-%d'),
+            'review': self._clean_review_text(row['My Review']) if pd.notna(row['My Review']) else None,
+            'isbn13': row['ISBN13'] if pd.notna(row['ISBN13']) else None,
+            'year_published': int(row['Year Published']) if pd.notna(row['Year Published']) else None
+        } for _, row in sorted_books.iterrows()]
 
     def _get_time_comparisons(self, hours):
         """
@@ -233,7 +252,8 @@ class GoodreadsDataProcessor:
 
         stats.update({
             "Monthly Rating Distribution": self.get_monthly_rating_distribution(start_date, end_date),
-            "Top Books Summary": self.get_top_books_summary(start_date, end_date)
+            "Top Books Summary": self.get_top_books_summary(start_date, end_date),
+            "All Books Read": self.get_all_books_read(start_date, end_date)  # New section added
         })
         
         return stats
@@ -265,104 +285,9 @@ def export_to_json(stats: Dict, output_path: str,):
 
     return serializable_stats
 
-
-# def print_statistics(stats):
-#     """Pretty print all statistics including new metrics"""
-#     if isinstance(stats, str):
-#         print(stats)
-#         return
-
-#     print("\n=== READING STATISTICS ===")
-#     print(f"\nTime Period: {stats['Time Period']['start']} to {stats['Time Period']['end']}")
-   
-#     print("\n=== BASIC STATISTICS ===")
-#     basic = stats['Basic Statistics']
-#     print(f"Total Books Read: {basic['total_books']}")
-#     print(f"Total Pages: {basic['total_pages']:,}")
-#     print(f"Estimated Words: {basic['estimated_words']:,}")
-#     print(f"Estimated Reading Time: {basic['estimated_hours']:,.1f} hours ({basic['estimated_days']:.1f} days)")
-   
-#     print("\n=== RATING STATISTICS ===")
-#     rating_stats = stats['Rating Statistics']
-#     print(f"Average Rating: {rating_stats['average_rating']:.2f}")
-#     print("\nRating Distribution:")
-#     for rating, count in rating_stats['rating_distribution'].items():
-#         stars = "★" * int(rating)
-#         print(f"  {stars:<5} ({rating}): {count} book(s)")
-   
-#     print("\n=== READING PATTERNS ===")
-#     patterns = stats['Reading Patterns']
-#     print(f"Average Days to Finish a Book: {patterns['average_days_to_finish']:.1f}")
-#     print("\nBooks Read per Month:")
-#     for month, count in patterns['books_per_month'].items():
-#         print(f"  {month}: {count} book(s)")
-
-
-#     print("\n=== MONTHLY RATING DISTRIBUTION ===")
-#     monthly_ratings = stats['Monthly Rating Distribution']
-#     for month, data in monthly_ratings.items():
-#         print(f"\n{month} - Average Rating: {data['average']:.2f}⭐")
-#         for rating, count in sorted(data['distribution'].items()):
-#             if count > 0:
-#                 stars = "★" * int(rating)
-#                 print(f"  {stars:<5} ({rating}): {count} book(s)")
-
-#     print("\n=== TOP BOOKS SUMMARY ===")
-#     print("\n{:<50} {:<7} {:<7} {:<10}".format("Title", "Rating", "Pages", "Date Read"))
-#     print("-" * 76)
-#     for book in stats['Top Books Summary']:
-#         title = f"{book['title'][:47]}..." if len(book['title']) > 47 else book['title']
-#         print("{:<50} {:<7} {:<7} {:<10}".format(
-#             title,
-#             f"{book['rating']}⭐",
-#             str(book['pages']),
-#             book['date_read']
-#         ))
-       
-#     print("\n=== TIME COMPARISONS ===")
-#     for comparison in stats['Time Comparisons']:
-#         print(f"• {comparison}")
-   
-#     print("\n=== LONGEST AND SHORTEST BOOKS ===")
-#     longest = stats['Book Extremes']['longest_book']
-#     shortest = stats['Book Extremes']['shortest_book']
-#     print(f"Longest: {longest['title']} by {longest['author']}")
-#     print(f"  • {longest['pages']:,} pages")
-#     print(f"  • Rating: {longest['rating']}/5")
-#     if longest['review']:
-#         print(f"  • Review: {longest['review']}")
-       
-#     print(f"\nShortest: {shortest['title']} by {shortest['author']}")
-#     print(f"  • {shortest['pages']:,} pages")
-#     print(f"  • Rating: {shortest['rating']}/5")
-#     if shortest['review']:
-#         print(f"  • Review: {shortest['review']}")
-   
-#     print("\n=== HIGHEST AND LOWEST RATED BOOKS ===")
-#     print("\nHighest Rated:")
-#     for book in stats['Highest and Lowest Rated']['highest_rated']:
-#         print(f"• {book['Title']} by {book['Author']} ({book['My Rating']} stars)")
-#         if book['My Review']:
-#             print(f"  Review: {book['My Review']}")
-   
-#     print("\nLowest Rated:")
-#     for book in stats['Highest and Lowest Rated']['lowest_rated']:
-#         print(f"• {book['Title']} by {book['Author']} ({book['My Rating']} stars)")
-#         if book['My Review']:
-#             print(f"  Review: {book['My Review']}")
-
-
-
-
 if __name__ == "__main__":
     processor = GoodreadsDataProcessor('goodreads_library_export.csv')
     
-    # # Get stats for 2024
-    # stats_react = processor.get_reading_stats_for_react(
-    #     start_date='2024-01-01',
-    #     end_date='2024-12-31'
-    # )
-
     stats = processor.get_statistics(
         start_date='2024-01-01',
         end_date='2024-12-31'

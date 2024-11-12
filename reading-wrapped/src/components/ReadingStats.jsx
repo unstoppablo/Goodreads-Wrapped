@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Overview from "./pages/Overview";
 import ReadingJourney from "./pages/ReadingJourney";
+import Ratings from "./pages/Ratings";
 
 const ReadingStats = ({ data }) => {
   const pages = [
@@ -21,7 +22,7 @@ const ReadingStats = ({ data }) => {
       id: "ratings",
       title: "Ratings",
       description: "Ratings summary for books read",
-      component: null,
+      component: Ratings,
     },
     {
       id: "top_books",
