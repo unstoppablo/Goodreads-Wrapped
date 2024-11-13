@@ -3,8 +3,49 @@ from datetime import datetime
 import numpy as np
 import re
 import json
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from collections import defaultdict
+import time
+import requests
+
+def get_book_cover(isbn: str) -> Optional[str]:
+    """
+    Retrieve book cover URL using multiple APIs, trying them in order until success.
+    """
+    if not isbn or pd.isna(isbn):
+        return None
+        
+    # Clean ISBN - remove hyphens and spaces
+    isbn = str(isbn).replace('-', '').replace(' ', '')
+    
+    # 1. Try Open Library API first
+    openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
+    
+    try:
+        response = requests.head(openlibrary_url)
+        if response.status_code == 200 and int(response.headers.get('content-length', 0)) > 1000:
+            return openlibrary_url
+    except:
+        pass
+    
+    # 2. Try Google Books API as fallback
+    try:
+        google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
+        response = requests.get(google_url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('items'):
+                image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                for size in ['thumbnail', 'smallThumbnail']:
+                    if size in image_links:
+                        return image_links[size]
+    except:
+        pass
+    
+    return None
+
+
 
 class GoodreadsDataProcessor:
     def __init__(self, csv_path):
@@ -62,27 +103,6 @@ class GoodreadsDataProcessor:
             
         return review
 
-    def get_monthly_reading_pattern(self, start_date=None, end_date=None):
-        """
-        Get number of books finished per month in the specified date range
-        Returns: Dictionary with months as keys and book counts as values
-        """
-        df_period = self._filter_date_range(start_date, end_date)
-        
-        # Group by year and month, count books
-        monthly_counts = df_period.groupby([
-            df_period['Date Read'].dt.year,
-            df_period['Date Read'].dt.month
-        ]).size()
-        
-        # Format the results into a more readable dictionary
-        formatted_counts = {}
-        for (year, month), count in monthly_counts.items():
-            month_name = datetime(year, month, 1).strftime('%Y-%m')
-            formatted_counts[month_name] = count
-            
-        return formatted_counts
-
     def get_monthly_rating_distribution(self, start_date=None, end_date=None):
         """
         Get rating distribution per month
@@ -134,6 +154,40 @@ class GoodreadsDataProcessor:
             'pages': row['Number of Pages'],
             'date_read': row['Date Read'].strftime('%Y-%m-%d')
         } for _, row in top_books.iterrows()]
+
+    def get_all_books_read(self, start_date=None, end_date=None):
+        """
+        Get details for all books read in the specified period
+        Returns: List of dictionaries containing book details
+        """
+        df_period = self._filter_date_range(start_date, end_date)
+        
+        # Sort by date read (descending)
+        sorted_books = df_period.sort_values('Date Read', ascending=False)
+        
+        processed_books = []
+        for _, row in sorted_books.iterrows():
+            # Fetch cover URL with rate limiting
+            cover_url = get_book_cover(row['ISBN'] if pd.notna(row['ISBN']) else None)
+            
+            book_data = {
+                'title': row['Title'],
+                'author': row['Author'],
+                'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
+                'pages': int(row['Number of Pages']) if pd.notna(row['Number of Pages']) else None,
+                'date_read': row['Date Read'].strftime('%Y-%m-%d'),
+                'review': self._clean_review_text(row['My Review']) if pd.notna(row['My Review']) else None,
+                'isbn': row['ISBN'] if pd.notna(row['ISBN']) else None,
+                'year_published': int(row['Year Published']) if pd.notna(row['Year Published']) else None,
+                'cover_url': cover_url
+            }
+            processed_books.append(book_data)
+            
+            # Add delay between API calls to avoid rate limiting
+            time.sleep(0.5)
+            
+        return processed_books
+
 
 
     def _get_time_comparisons(self, hours):
@@ -188,12 +242,12 @@ class GoodreadsDataProcessor:
         books_per_month = {str(k): v for k, v in books_per_month.items()}
 
         stats = {
-            "Time Period": {
+            "Time_Period": {
                 "start": start_date,
                 "end": end_date
             },
             
-            "Basic Statistics": {
+            "Basic_Statistics": {
                 "total_books": len(df_period),
                 "total_pages": int(df_period['Number of Pages'].sum()),
                 "estimated_words": int(df_period['Number of Pages'].sum() * 250),
@@ -201,19 +255,19 @@ class GoodreadsDataProcessor:
                 "estimated_days": float(reading_days)
             },
             
-            "Rating Statistics": {
+            "Rating_Statistics": {
                 "average_rating": float(df_period['My Rating'].mean()),
                 "rating_distribution": {str(k): int(v) for k, v in df_period['My Rating'].value_counts().sort_index().to_dict().items()}
             },
             
-            "Reading Patterns": {
+            "Reading_Patterns": {
                 "books_per_month": books_per_month,
                 "average_days_to_finish": float(self._calculate_reading_pace(df_period))
             },
             
-            "Time Comparisons": self._get_time_comparisons(reading_hours),
+            "Time_Comparisons": self._get_time_comparisons(reading_hours),
             
-            "Book Extremes": {
+            "Book_Extremes": {
                 "longest_book": {
                     "title": df_period.loc[df_period['Number of Pages'].idxmax(), 'Title'],
                     "author": df_period.loc[df_period['Number of Pages'].idxmax(), 'Author'],
@@ -252,9 +306,9 @@ class GoodreadsDataProcessor:
         }
 
         stats.update({
-            "Monthly Reading Pattern": self.get_monthly_reading_pattern(start_date, end_date),
             "Monthly Rating Distribution": self.get_monthly_rating_distribution(start_date, end_date),
-            "Top Books Summary": self.get_top_books_summary(start_date, end_date)
+            "Top Books Summary": self.get_top_books_summary(start_date, end_date),
+            "All Books Read": self.get_all_books_read(start_date, end_date)  # New section added
         })
         
         return stats
@@ -286,114 +340,12 @@ def export_to_json(stats: Dict, output_path: str,):
 
     return serializable_stats
 
-
-def print_statistics(stats):
-    """Pretty print all statistics including new metrics"""
-    if isinstance(stats, str):
-        print(stats)
-        return
-
-    print("\n=== READING STATISTICS ===")
-    print(f"\nTime Period: {stats['Time Period']['start']} to {stats['Time Period']['end']}")
-   
-    print("\n=== BASIC STATISTICS ===")
-    basic = stats['Basic Statistics']
-    print(f"Total Books Read: {basic['total_books']}")
-    print(f"Total Pages: {basic['total_pages']:,}")
-    print(f"Estimated Words: {basic['estimated_words']:,}")
-    print(f"Estimated Reading Time: {basic['estimated_hours']:,.1f} hours ({basic['estimated_days']:.1f} days)")
-   
-    print("\n=== RATING STATISTICS ===")
-    rating_stats = stats['Rating Statistics']
-    print(f"Average Rating: {rating_stats['average_rating']:.2f}")
-    print("\nRating Distribution:")
-    for rating, count in rating_stats['rating_distribution'].items():
-        stars = "★" * int(rating)
-        print(f"  {stars:<5} ({rating}): {count} book(s)")
-   
-    print("\n=== READING PATTERNS ===")
-    patterns = stats['Reading Patterns']
-    print(f"Average Days to Finish a Book: {patterns['average_days_to_finish']:.1f}")
-    print("\nBooks Read per Month:")
-    for month, count in patterns['books_per_month'].items():
-        print(f"  {month}: {count} book(s)")
-       
-    print("\n=== MONTHLY READING PATTERN ===")
-    monthly_pattern = stats['Monthly Reading Pattern']
-    max_books = max(monthly_pattern.values()) if monthly_pattern else 0
-    for month, count in monthly_pattern.items():
-        bar = "📚" * count
-        print(f"{month:<7}: {bar:<{max_books*3}} ({count} books)")
-
-    print("\n=== MONTHLY RATING DISTRIBUTION ===")
-    monthly_ratings = stats['Monthly Rating Distribution']
-    for month, data in monthly_ratings.items():
-        print(f"\n{month} - Average Rating: {data['average']:.2f}⭐")
-        for rating, count in sorted(data['distribution'].items()):
-            if count > 0:
-                stars = "★" * int(rating)
-                print(f"  {stars:<5} ({rating}): {count} book(s)")
-
-    print("\n=== TOP BOOKS SUMMARY ===")
-    print("\n{:<50} {:<7} {:<7} {:<10}".format("Title", "Rating", "Pages", "Date Read"))
-    print("-" * 76)
-    for book in stats['Top Books Summary']:
-        title = f"{book['title'][:47]}..." if len(book['title']) > 47 else book['title']
-        print("{:<50} {:<7} {:<7} {:<10}".format(
-            title,
-            f"{book['rating']}⭐",
-            str(book['pages']),
-            book['date_read']
-        ))
-       
-    print("\n=== TIME COMPARISONS ===")
-    for comparison in stats['Time Comparisons']:
-        print(f"• {comparison}")
-   
-    print("\n=== LONGEST AND SHORTEST BOOKS ===")
-    longest = stats['Book Extremes']['longest_book']
-    shortest = stats['Book Extremes']['shortest_book']
-    print(f"Longest: {longest['title']} by {longest['author']}")
-    print(f"  • {longest['pages']:,} pages")
-    print(f"  • Rating: {longest['rating']}/5")
-    if longest['review']:
-        print(f"  • Review: {longest['review']}")
-       
-    print(f"\nShortest: {shortest['title']} by {shortest['author']}")
-    print(f"  • {shortest['pages']:,} pages")
-    print(f"  • Rating: {shortest['rating']}/5")
-    if shortest['review']:
-        print(f"  • Review: {shortest['review']}")
-   
-    print("\n=== HIGHEST AND LOWEST RATED BOOKS ===")
-    print("\nHighest Rated:")
-    for book in stats['Highest and Lowest Rated']['highest_rated']:
-        print(f"• {book['Title']} by {book['Author']} ({book['My Rating']} stars)")
-        if book['My Review']:
-            print(f"  Review: {book['My Review']}")
-   
-    print("\nLowest Rated:")
-    for book in stats['Highest and Lowest Rated']['lowest_rated']:
-        print(f"• {book['Title']} by {book['Author']} ({book['My Rating']} stars)")
-        if book['My Review']:
-            print(f"  Review: {book['My Review']}")
-
-
-
-
 if __name__ == "__main__":
     processor = GoodreadsDataProcessor('goodreads_library_export.csv')
     
-    # # Get stats for 2024
-    # stats_react = processor.get_reading_stats_for_react(
-    #     start_date='2024-01-01',
-    #     end_date='2024-12-31'
-    # )
-
     stats = processor.get_statistics(
         start_date='2024-01-01',
         end_date='2024-12-31'
     )
 
     export_to_json(stats, 'reading_stats_2024.json')
-    print_statistics(stats)
