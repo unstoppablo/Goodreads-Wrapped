@@ -3,8 +3,49 @@ from datetime import datetime
 import numpy as np
 import re
 import json
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from collections import defaultdict
+import time
+import requests
+
+def get_book_cover(isbn: str) -> Optional[str]:
+    """
+    Retrieve book cover URL using multiple APIs, trying them in order until success.
+    """
+    if not isbn or pd.isna(isbn):
+        return None
+        
+    # Clean ISBN - remove hyphens and spaces
+    isbn = str(isbn).replace('-', '').replace(' ', '')
+    
+    # 1. Try Open Library API first
+    openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
+    
+    try:
+        response = requests.head(openlibrary_url)
+        if response.status_code == 200 and int(response.headers.get('content-length', 0)) > 1000:
+            return openlibrary_url
+    except:
+        pass
+    
+    # 2. Try Google Books API as fallback
+    try:
+        google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
+        response = requests.get(google_url)
+        
+        if response.status_code == 200:
+            data = response.json()
+            if data.get('items'):
+                image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                for size in ['thumbnail', 'smallThumbnail']:
+                    if size in image_links:
+                        return image_links[size]
+    except:
+        pass
+    
+    return None
+
+
 
 class GoodreadsDataProcessor:
     def __init__(self, csv_path):
@@ -124,16 +165,30 @@ class GoodreadsDataProcessor:
         # Sort by date read (descending)
         sorted_books = df_period.sort_values('Date Read', ascending=False)
         
-        return [{
-            'title': row['Title'],
-            'author': row['Author'],
-            'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
-            'pages': int(row['Number of Pages']) if pd.notna(row['Number of Pages']) else None,
-            'date_read': row['Date Read'].strftime('%Y-%m-%d'),
-            'review': self._clean_review_text(row['My Review']) if pd.notna(row['My Review']) else None,
-            'isbn13': row['ISBN13'] if pd.notna(row['ISBN13']) else None,
-            'year_published': int(row['Year Published']) if pd.notna(row['Year Published']) else None
-        } for _, row in sorted_books.iterrows()]
+        processed_books = []
+        for _, row in sorted_books.iterrows():
+            # Fetch cover URL with rate limiting
+            cover_url = get_book_cover(row['ISBN'] if pd.notna(row['ISBN']) else None)
+            
+            book_data = {
+                'title': row['Title'],
+                'author': row['Author'],
+                'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
+                'pages': int(row['Number of Pages']) if pd.notna(row['Number of Pages']) else None,
+                'date_read': row['Date Read'].strftime('%Y-%m-%d'),
+                'review': self._clean_review_text(row['My Review']) if pd.notna(row['My Review']) else None,
+                'isbn': row['ISBN'] if pd.notna(row['ISBN']) else None,
+                'year_published': int(row['Year Published']) if pd.notna(row['Year Published']) else None,
+                'cover_url': cover_url
+            }
+            processed_books.append(book_data)
+            
+            # Add delay between API calls to avoid rate limiting
+            time.sleep(0.5)
+            
+        return processed_books
+
+
 
     def _get_time_comparisons(self, hours):
         """
