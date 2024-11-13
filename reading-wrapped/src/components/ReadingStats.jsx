@@ -4,6 +4,9 @@ import Overview from "./pages/Overview";
 import ReadingJourney from "./pages/ReadingJourney";
 import Ratings from "./pages/Ratings";
 import BookListing from "./pages/BookListing";
+import BookExtremes from "./pages/BookExtremes";
+import FunFacts from "./pages/FunFacts";
+import SummaryStats from "./pages/SummaryStats";
 
 const ReadingStats = ({ data }) => {
   const pages = [
@@ -40,14 +43,20 @@ const ReadingStats = ({ data }) => {
     {
       id: "longest_and_shortest",
       title: "Your Longest and Shortest Books",
-      description: "A listing of least favorite books",
-      component: null,
+      description: "PLACEHOLDER",
+      component: BookExtremes,
     },
     {
       id: "fun_facts",
       title: "Fun Facts",
       description: "A fun way of visualizing the number of books a user read",
-      component: null,
+      component: FunFacts,
+    },
+    {
+      id: "final_page",
+      title: "Your Year in Review",
+      description: "PLACEHOLDER",
+      component: SummaryStats,
     },
   ];
 
