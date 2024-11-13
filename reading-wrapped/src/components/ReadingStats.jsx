@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Overview from "./pages/Overview";
 import ReadingJourney from "./pages/ReadingJourney";
 import Ratings from "./pages/Ratings";
-import FavoriteBooks from "./pages/FavoriteBooks";
+import BookListing from "./pages/BookListing";
 
 const ReadingStats = ({ data }) => {
   const pages = [
@@ -29,13 +29,13 @@ const ReadingStats = ({ data }) => {
       id: "top_books",
       title: "Your Top Books",
       description: "A listing of favorite books",
-      component: FavoriteBooks,
+      component: (props) => <BookListing {...props} sortOrder="desc" />,
     },
     {
       id: "worst_books",
       title: "Your Least Favorite Books",
       description: "A listing of least favorite books",
-      component: null,
+      component: (props) => <BookListing {...props} sortOrder="asc" />,
     },
     {
       id: "longest_and_shortest",

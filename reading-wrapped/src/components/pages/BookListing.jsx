@@ -5,12 +5,19 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import bookNotFound from "@/components/images/book_not_found.jpeg";
 
-const TopBooks = ({ data }) => {
-  // Get top 5 books by rating
-  const topBooks = [...data["All Books Read"]]
-    .sort((a, b) => b.rating - a.rating)
-    .slice(0, 5);
+const BookListing = ({
+  data,
+  sortOrder = "desc",
+  maxBooks = 3,
+  title = "Books",
+}) => {
+  const sortedBooks = [...data["All Books Read"]]
+    .sort((a, b) =>
+      sortOrder === "desc" ? b.rating - a.rating : a.rating - b.rating
+    )
+    .slice(0, maxBooks);
 
   const RatingStars = ({ rating }) => {
     return (
@@ -29,28 +36,28 @@ const TopBooks = ({ data }) => {
     );
   };
 
+  if (sortedBooks.length === 0) {
+    return (
+      <div className="text-center text-gray-500 py-8">
+        No books read yet. Time to start your reading journey!
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
-      {topBooks.map((book, index) => (
+      {sortedBooks.map((book, index) => (
         <div
           key={`${book.title}-${index}`}
           className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
         >
-          {/* Book Cover */}
+          {/* Book Cover with Fallback */}
           <div className="self-center sm:self-start">
-            {book.cover_url ? (
-              <img
-                src={book.cover_url}
-                alt={`Cover of ${book.title}`}
-                className="w-24 h-36 object-cover rounded-md shadow-sm"
-              />
-            ) : (
-              <div className="w-24 h-36 bg-gray-100 rounded-md shadow-sm flex items-center justify-center">
-                <span className="text-gray-400 text-xs text-center px-2">
-                  No cover available
-                </span>
-              </div>
-            )}
+            <img
+              src={book.cover_url || bookNotFound}
+              alt={`Cover of ${book.title}`}
+              className="w-24 h-36 object-cover rounded-md shadow-sm"
+            />
           </div>
 
           {/* Book Details */}
@@ -96,4 +103,4 @@ const TopBooks = ({ data }) => {
   );
 };
 
-export default TopBooks;
+export default BookListing;
