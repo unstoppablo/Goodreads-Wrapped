@@ -7,12 +7,7 @@ import {
 } from "@/components/ui/popover";
 import bookNotFound from "@/components/images/book_not_found.jpeg";
 
-const BookListing = ({
-  data,
-  sortOrder = "desc",
-  maxBooks = 3,
-  title = "Books",
-}) => {
+const BookListing = ({ data, sortOrder = "desc", maxBooks = 5 }) => {
   const sortedBooks = [...data["All Books Read"]]
     .sort((a, b) =>
       sortOrder === "desc" ? b.rating - a.rating : a.rating - b.rating
