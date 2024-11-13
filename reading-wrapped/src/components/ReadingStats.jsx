@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Overview from "./pages/Overview";
 import ReadingJourney from "./pages/ReadingJourney";
 import Ratings from "./pages/Ratings";
+import FavoriteBooks from "./pages/FavoriteBooks";
 
 const ReadingStats = ({ data }) => {
   const pages = [
@@ -28,7 +29,7 @@ const ReadingStats = ({ data }) => {
       id: "top_books",
       title: "Your Top Books",
       description: "A listing of favorite books",
-      component: null,
+      component: FavoriteBooks,
     },
     {
       id: "worst_books",
