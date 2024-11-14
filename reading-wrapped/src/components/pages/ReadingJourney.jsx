@@ -1,6 +1,9 @@
 import React from "react";
 
-const ReadingJourney = ({ data }) => {
+const MAX_EMOJI_DISPLAY = 6;
+
+// First page: Monthly Reading Progress
+export const ReadingProgress = ({ data }) => {
   const allMonths = [
     { num: "01", name: "Jan" },
     { num: "02", name: "Feb" },
@@ -22,75 +25,181 @@ const ReadingJourney = ({ data }) => {
     return acc;
   }, {});
 
-  const maxValue = Math.max(...Object.values(monthlyData));
-  const maxMonths = Object.entries(monthlyData)
-    .filter(([_, count]) => count === maxValue)
-    .map(([month]) => month);
-
   return (
-    <div className="space-y-4 px-2">
-      {/* Monthly Reading Chart */}
-      <div className="rounded-lg bg-gray-50 p-4">
-        <h3 className="text-base font-medium text-gray-900 mb-4">
-          Monthly Reading Progress
-        </h3>
-        <div className="space-y-3">
-          {Object.entries(monthlyData).map(([month, value]) => (
-            <div key={month} className="flex items-center gap-2">
-              <div className="w-10 text-sm font-medium text-gray-700">
-                {month}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center flex-wrap gap-1">
-                  <div className="text-xl leading-none">
-                    {Array(value).fill("📚").join("")}
+    <div className="h-full w-full flex items-center justify-center">
+      <div className="w-full max-w-lg">
+        {/* Title Section */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Your reading timeline!
+          </h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Let's see how your reading journey unfolded throughout the months...
+          </p>
+        </div>
+        <div className="rounded-lg bg-gray-50 p-4">
+          <div className="space-y-3">
+            {Object.entries(monthlyData).map(([month, value]) => (
+              <div key={month} className="flex items-center gap-2">
+                <div className="w-10 text-sm font-medium text-gray-700">
+                  {month}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center flex-wrap gap-1">
+                    <span className="text-xs text-gray-500">({value})</span>
+                    <div className="text-xl leading-none">
+                      {value > MAX_EMOJI_DISPLAY
+                        ? `${"📚".repeat(MAX_EMOJI_DISPLAY)} +`
+                        : "📚".repeat(value)}
+                    </div>
                   </div>
-                  <span className="text-xs text-gray-500">
-                    ({value} book{value !== 1 ? "s" : ""})
-                  </span>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Reading Statistics */}
-      <div className="grid grid-cols-1 gap-4">
-        <div className="rounded-lg bg-blue-50 p-4">
-          <h3 className="text-sm font-medium text-blue-600">
-            Most Active Months
-          </h3>
-          <p className="mt-1 text-sm text-gray-900">
-            You read the most books ({maxValue}) in{" "}
-            {maxMonths.map((month, index) => (
-              <span key={month}>
-                {month}
-                {index < maxMonths.length - 1 ? ", " : ""}
-              </span>
             ))}
-          </p>
-        </div>
-
-        <div className="rounded-lg bg-purple-50 p-4">
-          <h3 className="text-sm font-medium text-purple-600">Reading Pace</h3>
-          <p className="mt-1 text-sm text-gray-900">
-            On average, it took you{" "}
-            {data.Reading_Patterns.average_days_to_finish.toFixed(1)} days to
-            finish a book
-          </p>
-        </div>
-
-        <div className="rounded-lg bg-green-50 p-4">
-          <h3 className="text-sm font-medium text-green-600">Total Progress</h3>
-          <p className="mt-1 text-sm text-gray-900">
-            {data.Basic_Statistics.total_books} books,{" "}
-            {data.Basic_Statistics.total_pages.toLocaleString()} pages
-          </p>
+          </div>
         </div>
       </div>
     </div>
   );
 };
 
+// Second page: Reading Stats
+export const ReadingStats = ({ data }) => {
+  const months = [
+    { name: "January", shortName: "Jan", key: "2024-01" },
+    { name: "February", shortName: "Feb", key: "2024-02" },
+    { name: "March", shortName: "Mar", key: "2024-03" },
+    { name: "April", shortName: "Apr", key: "2024-04" },
+    { name: "May", shortName: "May", key: "2024-05" },
+    { name: "June", shortName: "Jun", key: "2024-06" },
+    { name: "July", shortName: "Jul", key: "2024-07" },
+    { name: "August", shortName: "Aug", key: "2024-08" },
+    { name: "September", shortName: "Sep", key: "2024-09" },
+    { name: "October", shortName: "Oct", key: "2024-10" },
+    { name: "November", shortName: "Nov", key: "2024-11" },
+    { name: "December", shortName: "Dec", key: "2024-12" },
+  ];
+
+  // Calculate books per month
+  const monthlyBooks = months.reduce((acc, month) => {
+    acc[month.name] = data.Reading_Patterns.books_per_month[month.key] || 0;
+    return acc;
+  }, {});
+
+  // Calculate pages per month
+  const monthlyPages = months.reduce((acc, month) => {
+    const monthBooks = data["All Books Read"].filter((book) =>
+      book.date_read.startsWith(month.key)
+    );
+    acc[month.name] = monthBooks.reduce((sum, book) => sum + book.pages, 0);
+    return acc;
+  }, {});
+
+  // Get top 3 months by books
+  const topMonthsByBooks = Object.entries(monthlyBooks)
+    .filter(([_, count]) => count > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([month, count]) => ({
+      name: month,
+      count: count,
+    }));
+
+  // Get top 3 months by pages
+  const topMonthsByPages = Object.entries(monthlyPages)
+    .filter(([_, pages]) => pages > 0)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([month, pages]) => ({
+      name: month,
+      pages: pages,
+    }));
+
+  return (
+    <div className="h-full w-full flex items-center justify-center">
+      <div className="w-full max-w-lg space-y-4">
+        {/* Title Section */}
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Some of your milestones
+          </h2>
+          <p className="mt-1 text-sm text-gray-600">
+            Life's a marathon, not a race.
+          </p>
+          <p className="mt-1 text-sm text-gray-600">
+            Although marathons <em>are</em> races? Anyway:
+          </p>
+        </div>
+        <div className="rounded-lg bg-green-50 p-4">
+          <h3 className="text-sm font-medium text-green-600">Total Progress</h3>
+          <p className="mt-1 text-sm text-gray-900">
+            {data.Basic_Statistics.total_books} books or{" "}
+            {data.Basic_Statistics.total_pages.toLocaleString()} pages 😮
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-blue-50 p-4">
+          <h3 className="text-sm font-medium text-blue-600">
+            Your most active months were
+          </h3>
+          <p className="mt-1 text-sm text-gray-900">
+            {topMonthsByBooks.map((month, index) => (
+              <span key={month.name}>
+                {index === topMonthsByBooks.length - 1 ? (
+                  <span>
+                    and {month.name} ({month.count} book
+                    {month.count !== 1 ? "s" : ""})
+                  </span>
+                ) : (
+                  <span>
+                    {month.name} ({month.count} book
+                    {month.count !== 1 ? "s" : ""})
+                    {index < topMonthsByBooks.length - 2 ? ", " : " "}
+                  </span>
+                )}
+              </span>
+            ))}{" "}
+            🔥
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-indigo-50 p-4">
+          <h3 className="text-sm font-medium text-indigo-600">
+            You read the most pages in
+          </h3>
+          <p className="mt-1 text-sm text-gray-900">
+            {topMonthsByPages.map((month, index) => (
+              <span key={month.name}>
+                {index === topMonthsByPages.length - 1 ? (
+                  <span>
+                    and {month.name} ({month.pages.toLocaleString()} pages)
+                  </span>
+                ) : (
+                  <span>
+                    {month.name} ({month.pages.toLocaleString()} pages)
+                    {index < topMonthsByPages.length - 2 ? ", " : " "}
+                  </span>
+                )}
+              </span>
+            ))}{" "}
+            📑
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-purple-50 p-4">
+          <h3 className="text-sm font-medium text-purple-600">
+            Your reading pace
+          </h3>
+          <p className="mt-1 text-sm text-gray-900">
+            On average, it took you approximately{" "}
+            {Math.round(data.Reading_Patterns.average_days_to_finish)} days to
+            finish a book ⏱️
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+// Default export with both components
+const ReadingJourney = { ReadingProgress, ReadingStats };
 export default ReadingJourney;

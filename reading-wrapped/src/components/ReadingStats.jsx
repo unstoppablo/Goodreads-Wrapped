@@ -12,50 +12,42 @@ const ReadingStats = ({ data }) => {
   const pages = [
     {
       id: "overview",
-      title: "Overview",
-      description: "Basic reading statistics for the year",
       component: Overview,
     },
     {
       id: "reading_journey",
-      title: "Reading Journey",
-      description: "Books read throughout the months",
-      component: ReadingJourney,
+      component: ReadingJourney.ReadingProgress,
+    },
+    {
+      id: "reading_journey",
+      component: ReadingJourney.ReadingStats,
     },
     {
       id: "ratings",
-      title: "Ratings",
-      description: "Ratings summary for books read",
-      component: Ratings,
+      component: Ratings.RatingsOverview,
+    },
+    {
+      id: "ratings",
+      component: Ratings.MonthlyRatings,
     },
     {
       id: "top_books",
-      title: "Your Top Books",
-      description: "A listing of favorite books",
       component: (props) => <BookListing {...props} sortOrder="desc" />,
     },
     {
       id: "worst_books",
-      title: "Your Least Favorite Books",
-      description: "A listing of least favorite books",
       component: (props) => <BookListing {...props} sortOrder="asc" />,
     },
     {
       id: "longest_and_shortest",
-      title: "Your Longest and Shortest Books",
-      description: "PLACEHOLDER",
       component: BookExtremes,
     },
     {
       id: "fun_facts",
-      title: "Fun Facts",
-      description: "A fun way of visualizing the number of books a user read",
       component: FunFacts,
     },
     {
       id: "final_page",
-      title: "Your Year in Review",
-      description: "PLACEHOLDER",
       component: SummaryStats,
     },
   ];
@@ -76,46 +68,35 @@ const ReadingStats = ({ data }) => {
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
-      <div className="w-full max-w-7xl mx-auto px-4 py-4 md:px-8 md:py-8">
-        {/* Title and Description */}
-        <div className="text-center mb-4">
-          <h2 className="text-lg md:text-xl font-semibold text-gray-900">
-            {pages[currentPageIndex].title}
-          </h2>
-          <p className="text-xs md:text-sm text-gray-500">
-            {pages[currentPageIndex].description}
-          </p>
-        </div>
+      <div className="w-full max-w-7xl mx-auto px-4 py-4 md:px-8 md:py-8 h-screen flex flex-col">
+        <div className="relative flex-1 flex flex-col">
+          {/* Progress indicator */}
+          <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-8">
+            {pages.map((page, index) => (
+              <div
+                key={`${page.id}-${index}`}
+                className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full transition-colors
+                  ${
+                    index === currentPageIndex ? "bg-blue-500" : "bg-gray-200"
+                  }`}
+              />
+            ))}
+          </div>
 
-        {/* Progress indicator */}
-        <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-8">
-          {pages.map((page, index) => (
-            <button
-              key={page.id}
-              onClick={() => setCurrentPageIndex(index)}
-              className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full transition-colors
-                ${
-                  index === currentPageIndex
-                    ? "bg-blue-500"
-                    : "bg-gray-200 active:bg-gray-300 hover:bg-gray-300"
-                }`}
-              aria-label={`Go to ${page.title}`}
-            />
-          ))}
-        </div>
-
-        {/* Main container with fixed navigation */}
-        <div className="relative">
           {/* Content */}
-          <div className="rounded-lg bg-white p-4 md:p-6 shadow-lg">
-            <div className="min-h-[400px]">
-              {CurrentPage ? (
-                <CurrentPage data={data} />
-              ) : (
-                <p className="text-gray-500 text-center">
-                  Content for {pages[currentPageIndex].title} coming soon...
-                </p>
-              )}
+          <div className="flex-1 flex items-center justify-center mb-16">
+            <div className="rounded-lg bg-white p-4 md:p-6 shadow-lg w-full">
+              <div className="min-h-[400px] flex items-center justify-center">
+                <div className="w-full">
+                  {CurrentPage ? (
+                    <CurrentPage data={data} />
+                  ) : (
+                    <p className="text-gray-500 text-center">
+                      Content coming soon...
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
