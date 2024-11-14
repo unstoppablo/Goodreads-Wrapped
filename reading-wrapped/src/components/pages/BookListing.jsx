@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import bookNotFound from "@/components/images/book_not_found.jpeg";
+import bookNotFound from "@/components/media/book_not_found.jpeg";
 
 const BookListing = ({ data, sortOrder = "desc", maxBooks = 5 }) => {
   const sortedBooks = [...data["All Books Read"]]

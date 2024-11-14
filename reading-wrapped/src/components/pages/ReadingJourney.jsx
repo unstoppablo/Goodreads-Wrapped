@@ -27,26 +27,26 @@ export const ReadingProgress = ({ data }) => {
 
   return (
     <div className="h-full w-full flex items-center justify-center">
-      <div className="w-full max-w-lg">
+      <div className="w-full max-w-lg space-y-3">
         {/* Title Section */}
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-100">
             Your reading timeline!
           </h2>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-gray-400">
             Let's see how your reading journey unfolded throughout the months...
           </p>
         </div>
-        <div className="rounded-lg bg-gray-50 p-4">
+        <div className="rounded-lg bg-gray-800/50 p-4 border border-gray-700">
           <div className="space-y-3">
             {Object.entries(monthlyData).map(([month, value]) => (
               <div key={month} className="flex items-center gap-2">
-                <div className="w-10 text-sm font-medium text-gray-700">
+                <div className="w-10 text-sm font-medium text-gray-300">
                   {month}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center flex-wrap gap-1">
-                    <span className="text-xs text-gray-500">({value})</span>
+                    <span className="text-xs text-gray-400">({value})</span>
                     <div className="text-xl leading-none">
                       {value > MAX_EMOJI_DISPLAY
                         ? `${"📚".repeat(MAX_EMOJI_DISPLAY)} +`
@@ -120,29 +120,29 @@ export const ReadingStats = ({ data }) => {
       <div className="w-full max-w-lg space-y-4">
         {/* Title Section */}
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">
+          <h2 className="text-2xl font-bold text-gray-100">
             Some of your milestones
           </h2>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-gray-400">
             Life's a marathon, not a race.
           </p>
-          <p className="mt-1 text-sm text-gray-600">
+          <p className="mt-1 text-sm text-gray-400">
             Although marathons <em>are</em> races? Anyway:
           </p>
         </div>
-        <div className="rounded-lg bg-green-50 p-4">
-          <h3 className="text-sm font-medium text-green-600">Total Progress</h3>
-          <p className="mt-1 text-sm text-gray-900">
+        <div className="rounded-lg bg-green-950/50 p-4 border border-green-900/30">
+          <h3 className="text-sm font-medium text-green-300">Total Progress</h3>
+          <p className="mt-1 text-sm text-gray-200">
             {data.Basic_Statistics.total_books} books or{" "}
             {data.Basic_Statistics.total_pages.toLocaleString()} pages 😮
           </p>
         </div>
 
-        <div className="rounded-lg bg-blue-50 p-4">
-          <h3 className="text-sm font-medium text-blue-600">
+        <div className="rounded-lg bg-blue-950/50 p-4 border border-blue-900/30">
+          <h3 className="text-sm font-medium text-blue-300">
             Your most active months were
           </h3>
-          <p className="mt-1 text-sm text-gray-900">
+          <p className="mt-1 text-sm text-gray-200">
             {topMonthsByBooks.map((month, index) => (
               <span key={month.name}>
                 {index === topMonthsByBooks.length - 1 ? (
@@ -163,11 +163,11 @@ export const ReadingStats = ({ data }) => {
           </p>
         </div>
 
-        <div className="rounded-lg bg-indigo-50 p-4">
-          <h3 className="text-sm font-medium text-indigo-600">
+        <div className="rounded-lg bg-indigo-950/50 p-4 border border-indigo-900/30">
+          <h3 className="text-sm font-medium text-indigo-300">
             You read the most pages in
           </h3>
-          <p className="mt-1 text-sm text-gray-900">
+          <p className="mt-1 text-sm text-gray-200">
             {topMonthsByPages.map((month, index) => (
               <span key={month.name}>
                 {index === topMonthsByPages.length - 1 ? (
@@ -186,11 +186,11 @@ export const ReadingStats = ({ data }) => {
           </p>
         </div>
 
-        <div className="rounded-lg bg-purple-50 p-4">
-          <h3 className="text-sm font-medium text-purple-600">
+        <div className="rounded-lg bg-purple-950/50 p-4 border border-purple-900/30">
+          <h3 className="text-sm font-medium text-purple-300">
             Your reading pace
           </h3>
-          <p className="mt-1 text-sm text-gray-900">
+          <p className="mt-1 text-sm text-gray-200">
             On average, it took you approximately{" "}
             {Math.round(data.Reading_Patterns.average_days_to_finish)} days to
             finish a book ⏱️
@@ -200,6 +200,6 @@ export const ReadingStats = ({ data }) => {
     </div>
   );
 };
-// Default export with both components
+
 const ReadingJourney = { ReadingProgress, ReadingStats };
 export default ReadingJourney;

@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import bookNotFound from "@/components/images/book_not_found.jpeg";
+import bookNotFound from "@/components/media/book_not_found.jpeg";
 
 const BookExtremes = ({ data }) => {
   const { longest_book, shortest_book } = data.Book_Extremes;

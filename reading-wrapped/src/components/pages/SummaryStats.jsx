@@ -1,5 +1,5 @@
 import React from "react";
-import bookNotFound from "@/components/images/book_not_found.jpeg";
+import bookNotFound from "@/components/media/book_not_found.jpeg";
 
 const SummaryStats = ({ data }) => {
   // Get the favorite book (first 5-star book)

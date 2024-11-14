@@ -42,19 +42,20 @@ export const RatingsOverview = ({ data }) => {
       return {
         message:
           "You have excellent taste in books! Your high average rating shows you're great at picking books you'll enjoy.",
-        className: "bg-green-50 text-green-700",
+        className: "bg-green-950/50 border border-green-900/30 text-green-200",
       };
     } else if (rating >= 3.2) {
       return {
         message:
           "You're a balanced reader who's not afraid to be critical. Your ratings show thoughtful consideration of each book.",
-        className: "bg-blue-50 text-blue-700",
+        className: "bg-blue-950/50 border border-blue-900/30 text-blue-200",
       };
     } else {
       return {
         message:
           "Looks like it's been a challenging reading year. Remember, being critical is good - it means you have high standards!",
-        className: "bg-purple-50 text-purple-700",
+        className:
+          "bg-purple-950/50 border border-purple-900/30 text-purple-200",
       };
     }
   };
@@ -72,11 +73,11 @@ export const RatingsOverview = ({ data }) => {
     <div className="h-full w-full flex items-center justify-center">
       <div className="w-full max-w-lg space-y-6">
         {/* Average Rating Card */}
-        <div className="rounded-lg bg-white border border-gray-200 p-4 text-center">
-          <div className="text-3xl font-bold text-gray-900 mb-2">
+        <div className="rounded-lg bg-gray-900/80 border border-gray-800 p-4 text-center">
+          <div className="text-3xl font-bold text-gray-100 mb-2">
             {average_rating.toFixed(1)}
           </div>
-          <div className="text-sm text-gray-500">Average Rating</div>
+          <div className="text-sm text-gray-400">Average Rating</div>
         </div>
 
         {/* Rating Message */}
@@ -89,14 +90,12 @@ export const RatingsOverview = ({ data }) => {
         </div>
 
         {/* Rating Distribution */}
-        {/* Rating Distribution */}
-        <div className="rounded-lg bg-gray-50 p-4">
-          <h3 className="text-base font-medium text-gray-900 mb-4">
+        <div className="rounded-lg bg-gray-800/50 border border-gray-700 p-4">
+          <h3 className="text-base font-medium text-gray-100 mb-4">
             Rating Distribution
           </h3>
           <div className="space-y-3">
             {[5, 4, 3, 2, 1].map((rating) => {
-              // Added 1-star rating
               const count = rating_distribution[rating] || 0;
               const percentage = ((count / totalBooks) * 100).toFixed(1);
               const books = getBooksForRating(rating);
@@ -104,28 +103,28 @@ export const RatingsOverview = ({ data }) => {
               return (
                 <Popover key={rating}>
                   <PopoverTrigger asChild>
-                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                    <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-700/50 transition-colors cursor-pointer">
                       <div className="w-24 text-sm">
                         <RatingStars rating={rating} />
                       </div>
-                      <div className="flex-1 h-6 bg-gray-200 rounded-full overflow-hidden">
+                      <div className="flex-1 h-6 bg-gray-700 rounded-full overflow-hidden">
                         <div
                           className="h-full bg-blue-500 rounded-full transition-all duration-500"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
-                      <div className="w-32 text-sm text-gray-600 text-right">
+                      <div className="w-32 text-sm text-gray-300 text-right">
                         <span className="font-medium">{count}</span> book
                         {count !== 1 ? "s" : ""}
-                        <span className="text-gray-400 ml-1">
+                        <span className="text-gray-500 ml-1">
                           ({percentage}%)
                         </span>
                       </div>
                     </div>
                   </PopoverTrigger>
-                  <PopoverContent className="w-96">
+                  <PopoverContent className="w-96 bg-gray-900 border-gray-700">
                     <div className="space-y-2">
-                      <h4 className="font-medium text-sm mb-3">
+                      <h4 className="font-medium text-sm mb-3 text-gray-100">
                         Books rated {rating} stars: {books.length}
                       </h4>
                       <div className="max-h-64 overflow-y-auto space-y-2">
@@ -133,17 +132,19 @@ export const RatingsOverview = ({ data }) => {
                           books.map((book, index) => (
                             <div
                               key={index}
-                              className="text-sm border-b border-gray-100 last:border-0 pb-2 last:pb-0"
+                              className="text-sm border-b border-gray-800 last:border-0 pb-2 last:pb-0"
                             >
-                              <div className="font-medium">{book.title}</div>
-                              <div className="flex justify-between text-gray-500 text-xs">
+                              <div className="font-medium text-gray-200">
+                                {book.title}
+                              </div>
+                              <div className="flex justify-between text-gray-400 text-xs">
                                 <span>{book.author}</span>
                                 <span>{book.pages} pages</span>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-400">
                             No books found with this rating
                           </div>
                         )}
@@ -220,17 +221,17 @@ export const MonthlyRatings = ({ data }) => {
     <div className="h-full w-full flex items-center justify-center">
       <div className="w-full max-w-lg space-y-6">
         {bestMonth && (
-          <div className="rounded-lg bg-blue-50 p-4 text-blue-700">
+          <div className="rounded-lg bg-blue-950/50 p-4 text-blue-300 border border-blue-900/30">
             <span className="block">
               Your favorite reading month was {bestMonth.name}, with an average
               rating of {bestMonth.rating.toFixed(1)}
             </span>
-            <span className="block text-blue-600">{bestMonth.message}</span>
+            <span className="block text-blue-400">{bestMonth.message}</span>
           </div>
         )}
 
-        <div className="rounded-lg bg-gray-50 p-4">
-          <h3 className="text-base font-medium text-gray-900 mb-4">
+        <div className="rounded-lg bg-gray-800/50 border border-gray-700 p-4">
+          <h3 className="text-base font-medium text-gray-100 mb-4">
             Average Rating per Month
           </h3>
           <div className="space-y-3">
@@ -240,12 +241,12 @@ export const MonthlyRatings = ({ data }) => {
 
               return (
                 <div key={month.key} className="flex items-center gap-2">
-                  <div className="w-12 text-sm font-medium text-gray-700">
+                  <div className="w-12 text-sm font-medium text-gray-300">
                     {month.shortName}
                   </div>
                   {hasRating ? (
                     <>
-                      <div className="w-14 text-sm text-gray-900 font-medium">
+                      <div className="w-14 text-sm text-gray-200 font-medium">
                         {monthData.average.toFixed(1)}
                       </div>
                       <div className="flex-1">
@@ -253,7 +254,7 @@ export const MonthlyRatings = ({ data }) => {
                       </div>
                     </>
                   ) : (
-                    <div className="flex-1 text-sm text-gray-400">
+                    <div className="flex-1 text-sm text-gray-500">
                       No ratings yet
                     </div>
                   )}
