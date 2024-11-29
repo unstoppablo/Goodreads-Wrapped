@@ -58,7 +58,19 @@ class GoodreadsDataProcessor:
         date_columns = ['Date Read', 'Date Added']
         for col in date_columns:
             self.df[col] = pd.to_datetime(self.df[col], format='%m/%d/%y', errors='coerce')
-        
+    
+    def _clean_title(self, title):
+        """
+        Clean book title by removing series information in parentheses
+        Example: "Things Fall Apart (The African Trilogy, #1)" -> "Things Fall Apart"
+        """
+        if not isinstance(title, str):
+            return title
+            
+        # Remove series information in parentheses, including nested parentheses
+        cleaned_title = re.sub(r'\s*\([^)]*\)', '', title).strip()
+        return cleaned_title
+    
     def _filter_date_range(self, start_date=None, end_date=None):
         """
         Filter dataframe for specified date range based on 'Date Read'
@@ -148,12 +160,13 @@ class GoodreadsDataProcessor:
         ).head(n)
         
         return [{
-            'title': row['Title'],
+            'title': self._clean_title(row['Title']),
             'author': row['Author'],
             'rating': row['My Rating'],
             'pages': row['Number of Pages'],
             'date_read': row['Date Read'].strftime('%Y-%m-%d')
         } for _, row in top_books.iterrows()]
+
 
     def get_all_books_read(self, start_date=None, end_date=None):
         """
@@ -171,7 +184,7 @@ class GoodreadsDataProcessor:
             cover_url = get_book_cover(row['ISBN'] if pd.notna(row['ISBN']) else None)
             
             book_data = {
-                'title': row['Title'],
+                'title': self._clean_title(row['Title']),
                 'author': row['Author'],
                 'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
                 'pages': int(row['Number of Pages']) if pd.notna(row['Number of Pages']) else None,
@@ -187,6 +200,7 @@ class GoodreadsDataProcessor:
             time.sleep(0.5)
             
         return processed_books
+
 
 
 
@@ -223,6 +237,7 @@ class GoodreadsDataProcessor:
         
         if len(df_period) == 0:
             return "No books found in the specified date range."
+
 
         # Calculate reading hours
         reading_hours = (df_period['Number of Pages'].sum() * 2.5) / 60  # Assuming 2.5 mins per page
@@ -269,14 +284,14 @@ class GoodreadsDataProcessor:
             
             "Book_Extremes": {
                 "longest_book": {
-                    "title": df_period.loc[df_period['Number of Pages'].idxmax(), 'Title'],
+                    "title": self._clean_title(df_period.loc[df_period['Number of Pages'].idxmax(), 'Title']),
                     "author": df_period.loc[df_period['Number of Pages'].idxmax(), 'Author'],
                     "pages": int(df_period['Number of Pages'].max()),
                     "rating": float(df_period.loc[df_period['Number of Pages'].idxmax(), 'My Rating']),
                     "review": self._clean_review_text(df_period.loc[df_period['Number of Pages'].idxmax(), 'My Review'])
                 },
                 "shortest_book": {
-                    "title": df_period.loc[df_period['Number of Pages'].idxmin(), 'Title'],
+                    "title": self._clean_title(df_period.loc[df_period['Number of Pages'].idxmin(), 'Title']),
                     "author": df_period.loc[df_period['Number of Pages'].idxmin(), 'Author'],
                     "pages": int(df_period['Number of Pages'].min()),
                     "rating": float(df_period.loc[df_period['Number of Pages'].idxmin(), 'My Rating']),
