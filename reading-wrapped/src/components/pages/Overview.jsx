@@ -53,9 +53,9 @@ const Overview = ({ data }) => {
         {/* Fun Comparison */}
         <div className="rounded-lg bg-gray-800/50 p-4 border border-gray-700">
           <h3 className="text-sm font-medium text-gray-100 mb-2">
-            Did you know? That's the equivalent to
+            Did you know?
           </h3>
-          <p className="text-sm text-gray-400">{timeComparisons[0]}</p>
+          <p className="text-sm text-gray-400">{timeComparisons[5]}</p>
         </div>
       </div>
     </div>

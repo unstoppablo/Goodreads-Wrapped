@@ -75,9 +75,9 @@ export const RatingsOverview = ({ data }) => {
         {/* Average Rating Card */}
         <div className="rounded-lg bg-gray-900/80 border border-gray-800 p-4 text-center">
           <div className="text-3xl font-bold text-gray-100 mb-2">
-            {average_rating.toFixed(1)}
+            ✨ {average_rating.toFixed(1)} ✨
           </div>
-          <div className="text-sm text-gray-400">Average Rating</div>
+          <div className="text-sm text-gray-400">Average Book Rating</div>
         </div>
 
         {/* Rating Message */}
@@ -222,11 +222,17 @@ export const MonthlyRatings = ({ data }) => {
       <div className="w-full max-w-lg space-y-6">
         {bestMonth && (
           <div className="rounded-lg bg-blue-950/50 p-4 text-blue-300 border border-blue-900/30">
-            <span className="block">
-              Your favorite reading month was {bestMonth.name}, with an average
-              rating of {bestMonth.rating.toFixed(1)}
+            <span className="block text-lg font-medium text-blue-200 mb-2">
+              {bestMonth.message}
             </span>
-            <span className="block text-blue-400">{bestMonth.message}</span>
+            <span className="block text-sm">
+              Your favorite reading month was{" "}
+              <span className="text-base font-bold">{bestMonth.name}</span>,
+              with an average rating of{" "}
+              <span className="text-base font-bold">
+                {bestMonth.rating.toFixed(1)}
+              </span>
+            </span>
           </div>
         )}
 

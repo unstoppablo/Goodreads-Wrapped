@@ -14,42 +14,52 @@ const Main = ({ data }) => {
 
   const pages = [
     {
+      title: "",
       id: "overview",
       component: Overview,
     },
     {
+      title: "",
       id: "reading_journey",
       component: ReadingJourney.ReadingProgress,
     },
     {
+      title: "",
       id: "reading_journey",
       component: ReadingJourney.ReadingStats,
     },
     {
+      title: "",
       id: "ratings",
       component: Ratings.RatingsOverview,
     },
     {
+      title: "",
       id: "ratings",
       component: Ratings.MonthlyRatings,
     },
     {
+      title: "Your Top Books",
       id: "top_books",
       component: (props) => <BookListing {...props} sortOrder="desc" />,
     },
     {
+      title: "Your Least-Liked Books",
       id: "worst_books",
       component: (props) => <BookListing {...props} sortOrder="asc" />,
     },
     {
+      title: "Your Longest vs Shortest Book",
       id: "longest_and_shortest",
       component: BookExtremes,
     },
     {
+      title: "Some Neat Facts",
       id: "fun_facts",
       component: FunFacts,
     },
     {
+      title: "",
       id: "final_page",
       component: SummaryStats,
     },
@@ -68,6 +78,7 @@ const Main = ({ data }) => {
   };
 
   const CurrentPage = pages[currentPageIndex].component;
+  const currentTitle = pages[currentPageIndex].title;
 
   return (
     <div className="w-full min-h-screen relative overflow-hidden bg-gray-950">
@@ -115,6 +126,13 @@ const Main = ({ data }) => {
           {/* Content */}
           <div className="flex-1 flex items-center justify-center mb-16">
             <div className="rounded-lg bg-gray-900/80 backdrop-blur-md p-4 md:p-6 shadow-xl w-full border border-gray-800">
+              {/* Title (only shown if not empty) */}
+              {currentTitle && (
+                <h2 className="text-xl md:text-2xl font-semibold text-gray-100 mb-6 text-center">
+                  {currentTitle}
+                </h2>
+              )}
+
               <div className="min-h-[400px] flex items-center justify-center">
                 <div className="w-full text-gray-100">
                   {CurrentPage ? (

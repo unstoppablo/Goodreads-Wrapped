@@ -50,7 +50,7 @@ const BookListing = ({ data, sortOrder = "desc", maxBooks = 3 }) => {
             <h3 className="font-medium text-gray-900 text-base">
               {book.title}
             </h3>
-            <p className="text-sm text-gray-600">by {book.author}</p>
+            <p className="text-sm text-gray-600">{book.author}</p>
             <div className="flex items-center gap-2">
               <RatingStars rating={book.rating} />
               <span className="text-sm text-gray-500">{book.pages} pgs</span>
