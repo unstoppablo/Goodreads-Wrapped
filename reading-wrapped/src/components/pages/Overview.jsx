@@ -1,63 +1,73 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { motion } from "framer-motion";
+
+const StatReveal = ({ children, delay }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{
+      duration: 0.8,
+      delay,
+      ease: [0.21, 0.47, 0.32, 0.98],
+    }}
+  >
+    {children}
+  </motion.div>
+);
 
 const Overview = ({ data }) => {
   const { Basic_Statistics: basicStats, Time_Comparisons: timeComparisons } =
     data;
+  const [showStats, setShowStats] = useState(false);
+
+  useEffect(() => {
+    // Slight delay before starting animations
+    const timer = setTimeout(() => setShowStats(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (!showStats) return null;
 
   return (
-    <div className="h-full w-full flex items-center justify-center">
-      <div className="w-full max-w-lg space-y-6">
-        {/* Title Section */}
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-100">
-            Your year at a glance!
-          </h2>
-          <p className="mt-1 text-sm text-gray-400">
-            Here's everything you've accomplished in 2024 so far:
+    <div className="min-h-screen w-full flex flex-col items-center justify-center text-center px-4">
+      {/* Title */}
+      <StatReveal delay={0}>
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-16">
+          Your year at a glance
+        </h1>
+      </StatReveal>
+
+      {/* Books Read */}
+      <StatReveal delay={1}>
+        <div className="mb-16">
+          <span className="text-6xl md:text-8xl font-bold text-white">
+            {basicStats.total_books}
+          </span>
+          <p className="text-lg md:text-xl text-gray-400 mt-2">books read</p>
+        </div>
+      </StatReveal>
+
+      {/* Pages */}
+      <StatReveal delay={2.5}>
+        <div className="mb-16">
+          <span className="text-5xl md:text-7xl font-bold text-white">
+            {basicStats.total_pages.toLocaleString()}
+          </span>
+          <p className="text-lg md:text-xl text-gray-400 mt-2">pages turned</p>
+        </div>
+      </StatReveal>
+
+      {/* Time */}
+      <StatReveal delay={4.4}>
+        <div className="mb-16">
+          <span className="text-5xl md:text-7xl font-bold text-white">
+            {Math.round(basicStats.estimated_hours)}
+          </span>
+          <p className="text-lg md:text-xl text-gray-400 mt-2">
+            approximate hours spent reading
           </p>
         </div>
-
-        {/* Basic Stats 2x2 Grid */}
-        <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg bg-blue-950/50 p-4 border border-blue-900/30">
-            <h3 className="text-xs font-medium text-blue-300">Total Books</h3>
-            <p className="mt-1 text-2xl font-semibold text-blue-200">
-              {basicStats.total_books}
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-purple-950/50 p-4 border border-purple-900/30">
-            <h3 className="text-xs font-medium text-purple-300">Total Pages</h3>
-            <p className="mt-1 text-2xl font-semibold text-purple-200">
-              {basicStats.total_pages.toLocaleString()}
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-green-950/50 p-4 border border-green-900/30">
-            <h3 className="text-xs font-medium text-green-300">Reading Time</h3>
-            <p className="mt-1 text-2xl font-semibold text-green-200">
-              {Math.round(basicStats.estimated_hours)} hours
-            </p>
-          </div>
-
-          <div className="rounded-lg bg-indigo-950/50 p-4 border border-indigo-900/30">
-            <h3 className="text-xs font-medium text-indigo-300">
-              ~ Days Reading
-            </h3>
-            <p className="mt-1 text-2xl font-semibold text-indigo-200">
-              {Math.round(basicStats.estimated_days)}
-            </p>
-          </div>
-        </div>
-
-        {/* Fun Comparison */}
-        <div className="rounded-lg bg-gray-800/50 p-4 border border-gray-700">
-          <h3 className="text-sm font-medium text-gray-100 mb-2">
-            Did you know?
-          </h3>
-          <p className="text-sm text-gray-400">{timeComparisons[5]}</p>
-        </div>
-      </div>
+      </StatReveal>
     </div>
   );
 };
