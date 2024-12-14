@@ -12,6 +12,8 @@ def get_book_cover(isbn: str) -> Optional[str]:
     """
     Retrieve book cover URL using multiple APIs, trying them in order until success.
     """
+    start_time = time.time()
+
     if not isbn or pd.isna(isbn):
         return None
         
@@ -24,6 +26,7 @@ def get_book_cover(isbn: str) -> Optional[str]:
     try:
         response = requests.head(openlibrary_url)
         if response.status_code == 200 and int(response.headers.get('content-length', 0)) > 1000:
+            print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (OpenLibrary success)")
             return openlibrary_url
     except:
         pass
@@ -39,10 +42,12 @@ def get_book_cover(isbn: str) -> Optional[str]:
                 image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
                 for size in ['thumbnail', 'smallThumbnail']:
                     if size in image_links:
+                        print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (Google Books success)")
                         return image_links[size]
     except:
         pass
-    
+    print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (No cover found)")
+
     return None
 
 
@@ -58,7 +63,19 @@ class GoodreadsDataProcessor:
         date_columns = ['Date Read', 'Date Added']
         for col in date_columns:
             self.df[col] = pd.to_datetime(self.df[col], format='%m/%d/%y', errors='coerce')
-        
+    
+    def _clean_title(self, title):
+        """
+        Clean book title by removing series information in parentheses
+        Example: "Things Fall Apart (The African Trilogy, #1)" -> "Things Fall Apart"
+        """
+        if not isinstance(title, str):
+            return title
+            
+        # Remove series information in parentheses, including nested parentheses
+        cleaned_title = re.sub(r'\s*\([^)]*\)', '', title).strip()
+        return cleaned_title
+    
     def _filter_date_range(self, start_date=None, end_date=None):
         """
         Filter dataframe for specified date range based on 'Date Read'
@@ -148,12 +165,13 @@ class GoodreadsDataProcessor:
         ).head(n)
         
         return [{
-            'title': row['Title'],
+            'title': self._clean_title(row['Title']),
             'author': row['Author'],
             'rating': row['My Rating'],
             'pages': row['Number of Pages'],
             'date_read': row['Date Read'].strftime('%Y-%m-%d')
         } for _, row in top_books.iterrows()]
+
 
     def get_all_books_read(self, start_date=None, end_date=None):
         """
@@ -171,7 +189,7 @@ class GoodreadsDataProcessor:
             cover_url = get_book_cover(row['ISBN'] if pd.notna(row['ISBN']) else None)
             
             book_data = {
-                'title': row['Title'],
+                'title': self._clean_title(row['Title']),
                 'author': row['Author'],
                 'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
                 'pages': int(row['Number of Pages']) if pd.notna(row['Number of Pages']) else None,
@@ -190,6 +208,7 @@ class GoodreadsDataProcessor:
 
 
 
+
     def _get_time_comparisons(self, hours):
         """
         Generate interesting time comparisons
@@ -201,13 +220,13 @@ class GoodreadsDataProcessor:
         beaver_dam_time = 20  # hours per dam
 
         return [
-            f"Watching the entire Lord of the Rings trilogy {hours/11.4:.1f} times (precious!)",
-            f"Binging all seasons of The Office (US) {hours/73:.1f} times!",
-            f"Taking {hours/15:.1f} flights from NY to LA <airplane emoji>",
-            f"Listening to Taylor Swift's entire discography {hours/(274 * taylor_song_avg / 60):.1f} times (we're never ever getting that time back!)",
-            f"Playing 'Baby Shark' {hours*60/baby_shark_length:.1f} times (doo doo doo doo doo doo... sorry!)",
-            f"The International Space Station could orbit Earth {hours/iss_orbit_time:.1f} times (assuming its not flat <emoji here of eyes>)",
-            f"Running {hours/(avg_marathon_pace):.1f} marathons at an average pace of {avg_marathon_pace} hours (no couch potatoes here!)",
+            f"Watching the entire Lord of the Rings trilogy {hours/11.4:.1f} times  💍",
+            f"Binging all seasons of The Office (US) {hours/73:.1f} times 📎 ",
+            f"Taking {hours/15:.1f} flights from NY to LA.",
+            f"Listening to Taylor Swift's entire discography {hours/(274 * taylor_song_avg / 60):.1f} times.",
+            f"Playing 'Baby Shark' {hours*60/baby_shark_length:.1f} times (doo doo doo... 🦈)",
+            f"The International Space Station could orbit Earth {hours/iss_orbit_time:.1f} times in that same time (assuming its not flat 👀)",
+            f"Running {hours/(avg_marathon_pace):.1f} marathons at an average pace of {avg_marathon_pace} hours.",
             f"A beaver could build {hours/beaver_dam_time:.1f} dams (damn!)"
         ]
 
@@ -223,6 +242,7 @@ class GoodreadsDataProcessor:
         
         if len(df_period) == 0:
             return "No books found in the specified date range."
+
 
         # Calculate reading hours
         reading_hours = (df_period['Number of Pages'].sum() * 2.5) / 60  # Assuming 2.5 mins per page
@@ -269,14 +289,14 @@ class GoodreadsDataProcessor:
             
             "Book_Extremes": {
                 "longest_book": {
-                    "title": df_period.loc[df_period['Number of Pages'].idxmax(), 'Title'],
+                    "title": self._clean_title(df_period.loc[df_period['Number of Pages'].idxmax(), 'Title']),
                     "author": df_period.loc[df_period['Number of Pages'].idxmax(), 'Author'],
                     "pages": int(df_period['Number of Pages'].max()),
                     "rating": float(df_period.loc[df_period['Number of Pages'].idxmax(), 'My Rating']),
                     "review": self._clean_review_text(df_period.loc[df_period['Number of Pages'].idxmax(), 'My Review'])
                 },
                 "shortest_book": {
-                    "title": df_period.loc[df_period['Number of Pages'].idxmin(), 'Title'],
+                    "title": self._clean_title(df_period.loc[df_period['Number of Pages'].idxmin(), 'Title']),
                     "author": df_period.loc[df_period['Number of Pages'].idxmin(), 'Author'],
                     "pages": int(df_period['Number of Pages'].min()),
                     "rating": float(df_period.loc[df_period['Number of Pages'].idxmin(), 'My Rating']),
@@ -341,11 +361,21 @@ def export_to_json(stats: Dict, output_path: str,):
     return serializable_stats
 
 if __name__ == "__main__":
-    processor = GoodreadsDataProcessor('goodreads_library_export.csv')
+    start_time = time.time()
     
+    print("Starting Goodreads data processing...")
+    processor = GoodreadsDataProcessor('goodreads_library_export.csv')
+    print(f"Processor initialization took: {time.time() - start_time:.2f} seconds")
+    
+    stats_start = time.time()
     stats = processor.get_statistics(
         start_date='2024-01-01',
         end_date='2024-12-31'
     )
-
+    print(f"Statistics generation took: {time.time() - stats_start:.2f} seconds")
+    
+    export_start = time.time()
     export_to_json(stats, 'reading_stats_2024.json')
+    print(f"JSON export took: {time.time() - export_start:.2f} seconds")
+    
+    print(f"\nTotal execution time: {time.time() - start_time:.2f} seconds")

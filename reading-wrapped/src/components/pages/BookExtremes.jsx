@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import bookNotFound from "@/components/images/book_not_found.jpeg";
+import bookNotFound from "@/components/media/book_not_found.jpeg";
 
 const BookExtremes = ({ data }) => {
   const { longest_book, shortest_book } = data.Book_Extremes;
@@ -28,76 +28,58 @@ const BookExtremes = ({ data }) => {
   };
 
   const BookCard = ({ book, type }) => (
-    <div className="flex-1 flex flex-col">
-      {/* Title Card */}
-      <div
-        className={`rounded-lg p-4 mb-4 flex items-center gap-2 ${
-          type === "longest"
-            ? "bg-blue-50 text-blue-700 border border-blue-200"
-            : "bg-green-50 text-green-700 border border-green-200"
-        }`}
-      >
-        {type === "longest" ? (
-          <>
-            <ArrowUp className="w-5 h-5" />
-            <span>Longest Book</span>
-          </>
-        ) : (
-          <>
-            <ArrowDown className="w-5 h-5" />
-            <span>Shortest Book</span>
-          </>
-        )}
-        <span className="ml-auto font-medium">{book.pages} pages</span>
-      </div>
+    <div className="flex gap-3 p-3 bg-white rounded-lg border border-gray-200">
+      {/* Book Cover */}
+      <img
+        src={book.cover_url || bookNotFound}
+        alt={`Cover of ${book.title}`}
+        className="w-20 h-28 object-cover rounded-md shadow-sm flex-shrink-0"
+      />
 
       {/* Book Details */}
-      <div className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg border border-gray-200 h-full">
-        {/* Book Cover */}
-        <div className="self-center sm:self-start">
-          <img
-            src={book.cover_url || bookNotFound}
-            alt={`Cover of ${book.title}`}
-            className="w-24 h-36 object-cover rounded-md shadow-sm"
-          />
+      <div className="flex flex-col items-start gap-1">
+        {/* Book Type Indicator */}
+        <div className="flex items-center gap-1.5 text-sm font-semibold">
+          {type === "longest" ? (
+            <>
+              <ArrowUp className="w-4 h-4 text-blue-600" />
+              <span className="text-blue-600">Longest Book</span>
+            </>
+          ) : (
+            <>
+              <ArrowDown className="w-4 h-4 text-green-600" />
+              <span className="text-green-600">Shortest Book</span>
+            </>
+          )}
+          <span className="text-gray-600">• {book.pages} pages</span>
         </div>
 
-        {/* Book Info */}
-        <div className="flex-1 min-w-0 space-y-2">
-          <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-2 sm:gap-4">
-            <div className="text-center sm:text-left">
-              <h3 className="text-lg font-medium text-gray-900 break-words">
-                {book.title}
-              </h3>
-              <p className="text-sm text-gray-600">{book.author}</p>
-            </div>
-            <div className="flex-shrink-0 text-center sm:text-right">
-              <RatingStars rating={book.rating} />
-            </div>
-          </div>
-
-          {book.review && (
-            <Popover>
-              <PopoverTrigger className="text-sm text-blue-600 hover:text-blue-800">
-                Show review
-              </PopoverTrigger>
-              <PopoverContent className="w-96">
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm mb-3">Review</h4>
-                  <div className="max-h-64 overflow-y-auto">
-                    <div className="text-sm text-gray-600">
-                      {book.review.split("<br/>").map((paragraph, i) => (
-                        <p key={i} className="mb-2 last:mb-0">
-                          {paragraph}
-                        </p>
-                      ))}
-                    </div>
+        <h3 className="font-medium text-gray-900 text-base">{book.title}</h3>
+        <p className="text-sm text-gray-600">by {book.author}</p>
+        <div className="flex items-center gap-2">
+          <RatingStars rating={book.rating} />
+        </div>
+        {book.review && (
+          <Popover>
+            <PopoverTrigger className="text-sm text-blue-600 hover:text-blue-800">
+              Read review
+            </PopoverTrigger>
+            <PopoverContent className="w-72">
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">Review</h4>
+                <div className="max-h-48 overflow-y-auto">
+                  <div className="text-sm text-gray-600">
+                    {book.review.split("<br/>").map((paragraph, i) => (
+                      <p key={i} className="mb-2 last:mb-0">
+                        {paragraph}
+                      </p>
+                    ))}
                   </div>
                 </div>
-              </PopoverContent>
-            </Popover>
-          )}
-        </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+        )}
       </div>
     </div>
   );
@@ -112,12 +94,12 @@ const BookExtremes = ({ data }) => {
           The difference between your longest and shortest book is
         </p>
         <p className="text-3xl font-bold text-gray-900 mt-1">
-          {pageDifference} pages
+          {pageDifference} pages!
         </p>
       </div>
 
       {/* Books Display */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="space-y-4">
         <BookCard book={longest_book} type="longest" />
         <BookCard book={shortest_book} type="shortest" />
       </div>

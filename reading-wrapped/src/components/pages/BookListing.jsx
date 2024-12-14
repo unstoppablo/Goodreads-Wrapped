@@ -5,9 +5,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import bookNotFound from "@/components/images/book_not_found.jpeg";
+import bookNotFound from "@/components/media/book_not_found.jpeg";
 
-const BookListing = ({ data, sortOrder = "desc", maxBooks = 5 }) => {
+const BookListing = ({ data, sortOrder = "desc", maxBooks = 3 }) => {
   const sortedBooks = [...data["All Books Read"]]
     .sort((a, b) =>
       sortOrder === "desc" ? b.rating - a.rating : a.rating - b.rating
@@ -31,54 +31,39 @@ const BookListing = ({ data, sortOrder = "desc", maxBooks = 5 }) => {
     );
   };
 
-  if (sortedBooks.length === 0) {
-    return (
-      <div className="text-center text-gray-500 py-8">
-        No books read yet. Time to start your reading journey!
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {sortedBooks.map((book, index) => (
         <div
           key={`${book.title}-${index}`}
-          className="flex flex-col sm:flex-row gap-4 p-4 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
+          className="flex gap-3 p-3 bg-white rounded-lg border border-gray-200 hover:border-gray-300 transition-colors"
         >
-          {/* Book Cover with Fallback */}
-          <div className="self-center sm:self-start">
-            <img
-              src={book.cover_url || bookNotFound}
-              alt={`Cover of ${book.title}`}
-              className="w-24 h-36 object-cover rounded-md shadow-sm"
-            />
-          </div>
+          {/* Book Cover */}
+          <img
+            src={book.cover_url || bookNotFound}
+            alt={`Cover of ${book.title}`}
+            className="w-20 h-28 object-cover rounded-md shadow-sm flex-shrink-0"
+          />
 
-          {/* Book Details */}
-          <div className="flex-1 min-w-0 space-y-2">
-            <div className="flex flex-col sm:flex-row justify-between items-center sm:items-start gap-2 sm:gap-4">
-              <div className="text-center sm:text-left">
-                <h3 className="text-lg font-medium text-gray-900 break-words">
-                  {book.title}
-                </h3>
-                <p className="text-sm text-gray-600">{book.author}</p>
-              </div>
-              <div className="flex-shrink-0 text-center sm:text-right">
-                <RatingStars rating={book.rating} />
-                <p className="text-sm text-gray-500 mt-1">{book.pages} pages</p>
-              </div>
+          {/* Book Details - Using justify-between for even spacing */}
+          <div className="flex flex-col items-start justify-between h-28">
+            <h3 className="font-medium text-gray-900 text-base">
+              {book.title}
+            </h3>
+            <p className="text-sm text-gray-600">{book.author}</p>
+            <div className="flex items-center gap-2">
+              <RatingStars rating={book.rating} />
+              <span className="text-sm text-gray-500">{book.pages} pgs</span>
             </div>
-
             {book.review && (
               <Popover>
                 <PopoverTrigger className="text-sm text-blue-600 hover:text-blue-800">
-                  Show review
+                  Read review
                 </PopoverTrigger>
-                <PopoverContent className="w-96">
+                <PopoverContent className="w-72">
                   <div className="space-y-2">
-                    <h4 className="font-medium text-sm mb-3">Review</h4>
-                    <div className="max-h-64 overflow-y-auto">
+                    <h4 className="font-medium text-sm">Review</h4>
+                    <div className="max-h-48 overflow-y-auto">
                       <div className="text-sm text-gray-600">
                         {book.review.split("<br/>").map((paragraph, i) => (
                           <p key={i} className="mb-2 last:mb-0">
