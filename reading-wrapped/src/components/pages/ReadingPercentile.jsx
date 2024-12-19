@@ -41,10 +41,14 @@ const ReadingPercentile = ({ data }) => {
       const timer = setTimeout(() => setStage(1), 2000);
       return () => clearTimeout(timer);
     }
-    if (stage === 1) {
-      const timer = setTimeout(() => setStage(2), 8000); // Duration of one animation cycle
-      return () => clearTimeout(timer);
-    }
+    // if (stage === 1) {
+    //   const timer = setTimeout(() => setStage(2), 2000); // Duration of one animation cycle
+    //   return () => clearTimeout(timer);
+    // }
+    // if (stage === 2) {
+    //   const timer = setTimeout(() => setStage(2), 8000); // Duration of one animation cycle
+    //   return () => clearTimeout(timer);
+    // }
   }, [stage]);
 
   return (
@@ -53,74 +57,53 @@ const ReadingPercentile = ({ data }) => {
         {stage === 0 && (
           <motion.div
             key="hours"
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 5 }}
+            transition={{ duration: 2 }}
             className="space-y-4"
           >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="text-xl md:text-2xl text-gray-400"
-            >
-              You spent
-            </motion.div>
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.2 }}
               className="text-7xl md:text-8xl font-bold"
             >
-              {formatNumber(hours)}
+              {formatNumber(hours)} hours reading 😯
             </motion.div>
-            <motion.div
+            {/* <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.2 }}
               className="text-xl md:text-2xl text-gray-400"
             >
               hours reading!
-            </motion.div>
+            </motion.div> */}
           </motion.div>
         )}
 
         {stage === 1 && (
-          <div className="absolute inset-0">
-            <FloatingAnimation
-              emoji="📚"
-              count={400}
-              duration={{ min: 1, max: 2 }}
-              delay={{ max: 2 }}
-              cycleLength={8000}
-              size="text-3xl"
-            />
-          </div>
-        )}
-
-        {stage === 2 && (
           <motion.div
             key="percentile"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7 }}
+            transition={{ duration: 5 }}
             className="space-y-6"
           >
             <motion.div
-              className="text-2xl md:text-3xl"
+              className="text-2xl md:text-2xl font-bold"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
+              transition={{ delay: 1 }}
             >
               That's more than {percentile}% of readers 🤯
             </motion.div>
 
             <motion.div
-              className="text-lg text-gray-400"
+              className="text-1xl md:text-1xl font-bold"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 4 }}
             >
               That's what we call a page-turner!
             </motion.div>

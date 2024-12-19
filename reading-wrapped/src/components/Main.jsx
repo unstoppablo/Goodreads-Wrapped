@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Overview from "./pages/Overview";
-import ReadingJourney from "./pages/ReadingJourney";
+// import ReadingJourney from "./pages/ReadingJourney";
 import Ratings from "./pages/Ratings";
 import BookListing from "./pages/BookListing";
 import BookExtremes from "./pages/BookExtremes";
@@ -10,6 +10,8 @@ import SummaryStats from "./pages/SummaryStats";
 import backgroundVideo from "./media/background.mp4";
 import IntroPage from "./pages/IntroPage";
 import ReadingPercentile from "./pages/ReadingPercentile";
+import CoolStats from "./pages/CoolStats";
+import BookTrends from "./pages/BookTrends";
 
 const Main = ({ data }) => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -32,23 +34,18 @@ const Main = ({ data }) => {
     },
     {
       title: "",
-      id: "reading_journey",
-      component: ReadingJourney.ReadingProgress,
+      id: "cool_stats",
+      component: CoolStats,
     },
     {
       title: "",
-      id: "reading_journey",
-      component: ReadingJourney.ReadingStats,
+      id: "avg_ratings",
+      component: BookTrends.AverageRatings,
     },
     {
       title: "",
-      id: "ratings",
-      component: Ratings.RatingsOverview,
-    },
-    {
-      title: "",
-      id: "ratings",
-      component: Ratings.MonthlyRatings,
+      id: "fav_month",
+      component: BookTrends.FavMonth,
     },
     {
       title: "Your Top Books",

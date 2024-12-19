@@ -58,6 +58,7 @@ const Overview = ({ data }) => {
       </StatReveal>
 
       {/* Time */}
+
       <StatReveal delay={4.4}>
         <div className="mb-16">
           <span className="text-5xl md:text-7xl font-bold text-white">
