@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Overview from "./pages/Overview";
 // import ReadingJourney from "./pages/ReadingJourney";
-import Ratings from "./pages/Ratings";
+import GoodbyePage from "./pages/Goodbye";
 import BookListing from "./pages/BookListing";
 import BookExtremes from "./pages/BookExtremes";
 import FunFacts from "./pages/FunFacts";
@@ -81,6 +81,11 @@ const Main = ({ data }) => {
       title: "",
       id: "worst_books",
       component: (props) => <BookListing {...props} sortOrder="asc" />,
+    },
+    {
+      title: "",
+      id: "goodbye_message",
+      component: GoodbyePage,
     },
     {
       title: "",
