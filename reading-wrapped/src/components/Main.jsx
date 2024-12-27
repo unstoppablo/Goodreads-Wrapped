@@ -1,13 +1,17 @@
 import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Overview from "./pages/Overview";
-import ReadingJourney from "./pages/ReadingJourney";
-import Ratings from "./pages/Ratings";
+// import ReadingJourney from "./pages/ReadingJourney";
+import GoodbyePage from "./pages/Goodbye";
 import BookListing from "./pages/BookListing";
 import BookExtremes from "./pages/BookExtremes";
 import FunFacts from "./pages/FunFacts";
 import SummaryStats from "./pages/SummaryStats";
-import backgroundVideo from "./media/background.mp4"; // Import the video
+import backgroundVideo from "./media/background.mp4";
+import IntroPage from "./pages/IntroPage";
+import ReadingPercentile from "./pages/ReadingPercentile";
+import CoolStats from "./pages/CoolStats";
+import BookTrends from "./pages/BookTrends";
 
 const Main = ({ data }) => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -15,48 +19,73 @@ const Main = ({ data }) => {
   const pages = [
     {
       title: "",
+      id: "intro",
+      component: IntroPage,
+    },
+    {
+      title: "",
       id: "overview",
       component: Overview,
     },
     {
       title: "",
-      id: "reading_journey",
-      component: ReadingJourney.ReadingProgress,
+      id: "percentiles",
+      component: ReadingPercentile,
+    },
+    {
+      title: "That's equivalent to...",
+      id: "fun_facts",
+      component: FunFacts,
     },
     {
       title: "",
-      id: "reading_journey",
-      component: ReadingJourney.ReadingStats,
+      id: "cool_stats",
+      component: CoolStats,
     },
     {
       title: "",
-      id: "ratings",
-      component: Ratings.RatingsOverview,
+      id: "avg_ratings",
+      component: BookTrends.AverageRatings,
     },
     {
       title: "",
-      id: "ratings",
-      component: Ratings.MonthlyRatings,
+      id: "fav_month",
+      component: BookTrends.FavMonth,
     },
     {
-      title: "Your Top Books",
+      title: "",
+      id: "fav_month_books",
+      component: (props) => {
+        const bestMonth = BookTrends.getBestMonth(props.data);
+        return <BookListing {...props} month={bestMonth?.num} />;
+      },
+    },
+    {
+      id: "longest_book",
+      title: "",
+      description: "The book with the most pages you've read",
+      component: (props) => <BookExtremes {...props} type="longest" />,
+    },
+    {
+      id: "shortest_book",
+      title: "",
+      description: "The book with the least pages you've read",
+      component: (props) => <BookExtremes {...props} type="shortest" />,
+    },
+    {
+      title: "",
       id: "top_books",
       component: (props) => <BookListing {...props} sortOrder="desc" />,
     },
     {
-      title: "Your Least-Liked Books",
+      title: "",
       id: "worst_books",
       component: (props) => <BookListing {...props} sortOrder="asc" />,
     },
     {
-      title: "Your Longest vs Shortest Book",
-      id: "longest_and_shortest",
-      component: BookExtremes,
-    },
-    {
-      title: "Some Neat Facts",
-      id: "fun_facts",
-      component: FunFacts,
+      title: "",
+      id: "goodbye_message",
+      component: GoodbyePage,
     },
     {
       title: "",
@@ -82,15 +111,13 @@ const Main = ({ data }) => {
 
   return (
     <div className="w-full min-h-screen relative overflow-hidden bg-gray-950">
-      {/* Background Video Container */}
+      {/* Background Video */}
       <div className="fixed inset-0 w-full h-full z-0">
-        {/* Loading state background */}
         <div
           className={`absolute inset-0 bg-gradient-to-br from-gray-900 to-gray-950 transition-opacity duration-1000 
-            ${isVideoLoaded ? "opacity-0" : "opacity-100"}`}
+          ${isVideoLoaded ? "opacity-0" : "opacity-100"}`}
         />
 
-        {/* Video Element */}
         <video
           autoPlay
           loop
@@ -103,80 +130,86 @@ const Main = ({ data }) => {
           <source src={backgroundVideo} type="video/mp4" />
         </video>
 
-        {/* Darker overlay for better readability */}
         <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 py-4 md:px-8 md:py-8 h-screen flex flex-col">
-        <div className="relative flex-1 flex flex-col">
-          {/* Progress indicator */}
-          <div className="flex justify-center gap-1 md:gap-2 mb-4 md:mb-8">
-            {pages.map((page, index) => (
-              <div
-                key={`${page.id}-${index}`}
-                className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full transition-colors
-                  ${
-                    index === currentPageIndex ? "bg-blue-400" : "bg-gray-700"
-                  }`}
-              />
-            ))}
+      <div className="relative z-10 w-full h-screen flex flex-col items-center">
+        {/* Progress dots */}
+        <div className="fixed top-8 left-0 right-0 flex justify-center gap-1 md:gap-2">
+          {pages.map((page, index) => (
+            <div
+              key={`${page.id}-${index}`}
+              className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full transition-colors
+                ${index === currentPageIndex ? "bg-blue-400" : "bg-gray-700"}`}
+            />
+          ))}
+        </div>
+
+        {/* Page Content */}
+        <div className="flex-1 w-full flex items-center justify-center px-4">
+          {currentTitle && (
+            <h2 className="absolute top-16 left-0 right-0 text-3xl md:text-5xl font-bold text-white text-center mt-10">
+              {currentTitle}
+            </h2>
+          )}
+
+          <div className="w-full text-white">
+            {CurrentPage ? (
+              <CurrentPage data={data} />
+            ) : (
+              <p className="text-gray-400 text-center">
+                Content coming soon...
+              </p>
+            )}
           </div>
+        </div>
 
-          {/* Content */}
-          <div className="flex-1 flex items-center justify-center mb-16">
-            <div className="rounded-lg bg-gray-900/80 backdrop-blur-md p-4 md:p-6 shadow-xl w-full border border-gray-800">
-              {/* Title (only shown if not empty) */}
-              {currentTitle && (
-                <h2 className="text-xl md:text-2xl font-semibold text-gray-100 mb-6 text-center">
-                  {currentTitle}
-                </h2>
-              )}
+        {/* Mobile touch areas - only visible on mobile */}
+        <div className="md:hidden">
+          <button
+            onClick={goToPrevPage}
+            disabled={currentPageIndex === 0}
+            className="fixed left-0 top-0 w-16 h-full z-20"
+            aria-label="Previous page"
+          />
+          <button
+            onClick={goToNextPage}
+            disabled={currentPageIndex === pages.length - 1}
+            className="fixed right-0 top-0 w-16 h-full z-20"
+            aria-label="Next page"
+          />
+        </div>
 
-              <div className="min-h-[400px] flex items-center justify-center">
-                <div className="w-full text-gray-100">
-                  {CurrentPage ? (
-                    <CurrentPage data={data} />
-                  ) : (
-                    <p className="text-gray-400 text-center">
-                      Content coming soon...
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Desktop navigation buttons - only visible on desktop */}
+        <div className="hidden md:flex fixed bottom-8 left-0 right-0 justify-center gap-4 px-4">
+          <button
+            onClick={goToPrevPage}
+            disabled={currentPageIndex === 0}
+            className={`p-2 rounded-full transition-colors backdrop-blur-sm
+              ${
+                currentPageIndex === 0
+                  ? "opacity-0 cursor-not-allowed"
+                  : "bg-white/10 hover:bg-white/20 text-white"
+              }`}
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
 
-          {/* Navigation buttons */}
-          <div className="fixed bottom-4 left-0 right-0 flex justify-center gap-4 px-4">
-            <button
-              onClick={goToPrevPage}
-              disabled={currentPageIndex === 0}
-              className={`p-2 rounded-full transition-colors shadow-lg backdrop-blur-sm
-                ${
-                  currentPageIndex === 0
-                    ? "cursor-not-allowed text-gray-600 bg-gray-800/50"
-                    : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 active:bg-gray-600/50"
-                }`}
-              aria-label="Previous page"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-
-            <button
-              onClick={goToNextPage}
-              disabled={currentPageIndex === pages.length - 1}
-              className={`p-2 rounded-full transition-colors shadow-lg backdrop-blur-sm
-                ${
-                  currentPageIndex === pages.length - 1
-                    ? "cursor-not-allowed text-gray-600 bg-gray-800/50"
-                    : "bg-gray-800/50 text-gray-300 hover:bg-gray-700/50 active:bg-gray-600/50"
-                }`}
-              aria-label="Next page"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          </div>
+          <button
+            onClick={goToNextPage}
+            disabled={currentPageIndex === pages.length - 1}
+            className={`p-2 rounded-full transition-colors backdrop-blur-sm
+              ${
+                currentPageIndex === pages.length - 1
+                  ? "opacity-0 cursor-not-allowed"
+                  : "bg-white/10 hover:bg-white/20 text-white"
+              }`}
+            aria-label="Next page"
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
         </div>
       </div>
     </div>
