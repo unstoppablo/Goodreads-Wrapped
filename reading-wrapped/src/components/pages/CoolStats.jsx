@@ -55,7 +55,7 @@ export const CoolStats = ({ data }) => {
   const [currentStage, setCurrentStage] = useState(0);
 
   useEffect(() => {
-    const timings = [2000, 8700, 8700, 5000]; // Only transition through first stage automatically
+    const timings = [3000, 8700, 9700, 6000]; // Only transition through first stage automatically
 
     if (currentStage < 4) {
       const timer = setTimeout(() => {

@@ -48,12 +48,20 @@ const Main = ({ data }) => {
       component: BookTrends.FavMonth,
     },
     {
-      title: "Your Top Books",
+      title: "",
+      id: "fav_month_books",
+      component: (props) => {
+        const bestMonth = BookTrends.getBestMonth(props.data);
+        return <BookListing {...props} month={bestMonth?.num} />;
+      },
+    },
+    {
+      title: "",
       id: "top_books",
       component: (props) => <BookListing {...props} sortOrder="desc" />,
     },
     {
-      title: "Your Least-Liked Books",
+      title: "",
       id: "worst_books",
       component: (props) => <BookListing {...props} sortOrder="asc" />,
     },

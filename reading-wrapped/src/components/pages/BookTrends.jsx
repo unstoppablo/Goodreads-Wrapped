@@ -1,6 +1,57 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
+export const getBestMonth = (data) => {
+  const months = [
+    { name: "January", shortName: "Jan", key: "2024-01", num: 1 },
+    { name: "February", shortName: "Feb", key: "2024-02", num: 2 },
+    { name: "March", shortName: "Mar", key: "2024-03", num: 3 },
+    { name: "April", shortName: "Apr", key: "2024-04", num: 4 },
+    { name: "May", shortName: "May", key: "2024-05", num: 5 },
+    { name: "June", shortName: "Jun", key: "2024-06", num: 6 },
+    { name: "July", shortName: "Jul", key: "2024-07", num: 7 },
+    { name: "August", shortName: "Aug", key: "2024-08", num: 8 },
+    { name: "September", shortName: "Sep", key: "2024-09", num: 9 },
+    { name: "October", shortName: "Oct", key: "2024-10", num: 10 },
+    { name: "November", shortName: "Nov", key: "2024-11", num: 11 },
+    { name: "December", shortName: "Dec", key: "2024-12", num: 12 },
+  ];
+
+  let bestMonth = null;
+  let highestRating = 0;
+
+  months.forEach((month) => {
+    const monthData = data["Monthly Rating Distribution"][month.key];
+    if (monthData && monthData.average > highestRating) {
+      highestRating = monthData.average;
+      bestMonth = month;
+    }
+  });
+
+  const monthMessages = {
+    January: "Starting the year strong! 🎉",
+    February: "Feeling the love for books! ❤️",
+    March: "Springing forward with great reads! 🌸",
+    April: "Showered with amazing books! 🌧️",
+    May: "May the great books be with you! ⭐",
+    June: "Kicking off summer with stellar reads! ☀️",
+    July: "Heating up with hot reads! 🌞",
+    August: "Ending summer on a high note! 🏖️",
+    September: "Fall-ing for great books! 🍂",
+    October: "Treating yourself to great reads! 🎃",
+    November: "Giving thanks for good books! 🍁",
+    December: "Ending the year with a bang! 🎄",
+  };
+
+  return bestMonth
+    ? {
+        ...bestMonth,
+        rating: highestRating,
+        message: monthMessages[bestMonth.name],
+      }
+    : null;
+};
+
 const StatReveal = ({ children, delay }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -17,6 +68,12 @@ const StatReveal = ({ children, delay }) => (
 
 export const AverageRatings = ({ data }) => {
   const { average_rating, rating_distribution } = data.Rating_Statistics;
+  const [showStats, setShowStats] = useState(false);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowStats(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const getRatingMessage = (rating) => {
     if (rating >= 3.8) {
@@ -41,123 +98,78 @@ export const AverageRatings = ({ data }) => {
     }
   };
 
+  if (!showStats) return null;
+
   return (
-    <div className="h-full w-full flex items-center justify-center">
-      <div className="w-full max-w-lg space-y-6">
-        {/* Average Rating Card */}
+    <div className="min-h-screen w-full flex flex-col items-center justify-center text-center px-4">
+      <StatReveal delay={0}>
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-16">
+          Rating Breakdown
+        </h1>
+      </StatReveal>
 
-        <StatReveal delay={0}>
-          <p className="text-center max-w-1xl text-1xl md:text-3xl font-bold text-white text-center leading-tight">
-            You rated your books an average of ✨ {average_rating.toFixed(1)}{" "}
-            ✨stars
+      <StatReveal delay={1}>
+        <div className="mb-16">
+          <span className="text-6xl md:text-8xl font-bold text-white">
+            {average_rating.toFixed(1)}
+          </span>
+          <p className="text-lg md:text-xl text-gray-400 mt-2">
+            average rating
           </p>
-        </StatReveal>
+        </div>
+      </StatReveal>
 
-        {/* Rating Message */}
-        <StatReveal delay={3}>
-          <p className="text-center max-w-1xl text-1xl md:text-1xl  text-white text-center leading-tight">
-            {getRatingMessage(average_rating).message}
-          </p>
-        </StatReveal>
-      </div>
+      <StatReveal delay={2.5}>
+        <div
+          className={`text-lg md:text-xl max-w-2xl p-6 rounded-lg ${
+            getRatingMessage(average_rating).className
+          }`}
+        >
+          {getRatingMessage(average_rating).message}
+        </div>
+      </StatReveal>
     </div>
   );
 };
 
 export const FavMonth = ({ data }) => {
-  const months = [
-    { name: "January", shortName: "Jan", key: "2024-01" },
-    { name: "February", shortName: "Feb", key: "2024-02" },
-    { name: "March", shortName: "Mar", key: "2024-03" },
-    { name: "April", shortName: "Apr", key: "2024-04" },
-    { name: "May", shortName: "May", key: "2024-05" },
-    { name: "June", shortName: "Jun", key: "2024-06" },
-    { name: "July", shortName: "Jul", key: "2024-07" },
-    { name: "August", shortName: "Aug", key: "2024-08" },
-    { name: "September", shortName: "Sep", key: "2024-09" },
-    { name: "October", shortName: "Oct", key: "2024-10" },
-    { name: "November", shortName: "Nov", key: "2024-11" },
-    { name: "December", shortName: "Dec", key: "2024-12" },
-  ];
+  const [showStats, setShowStats] = useState(false);
 
-  // Find the highest rated month
-  const getBestMonth = () => {
-    let bestMonth = null;
-    let highestRating = 0;
+  useEffect(() => {
+    const timer = setTimeout(() => setShowStats(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
-    months.forEach((month) => {
-      const monthData = data["Monthly Rating Distribution"][month.key];
-      if (monthData && monthData.average > highestRating) {
-        highestRating = monthData.average;
-        bestMonth = month;
-      }
-    });
-
-    const monthMessages = {
-      January: "Starting the year strong! 🎉",
-      February: "Feeling the love for books! ❤️",
-      March: "Springing forward with great reads! 🌸",
-      April: "Showered with amazing books! 🌧️",
-      May: "May the great books be with you! ⭐",
-      June: "Kicking off summer with stellar reads! ☀️",
-      July: "Heating up with hot reads! 🌞",
-      August: "Ending summer on a high note! 🏖️",
-      September: "Fall-ing for great books! 🍂",
-      October: "Treating yourself to great reads! 🎃",
-      November: "Giving thanks for good books! 🍁",
-      December: "Ending the year with a bang! 🎄",
-    };
-
-    return bestMonth
-      ? {
-          name: bestMonth.name,
-          rating: highestRating,
-          message: monthMessages[bestMonth.name],
-        }
-      : null;
-  };
-
-  const bestMonth = getBestMonth();
-
-  const fadeInUp = {
-    initial: { opacity: 0, y: 500 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -200 },
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-  };
+  const bestMonth = getBestMonth(data);
+  if (!showStats || !bestMonth) return null;
 
   return (
-    <div className="h-full w-full flex items-center justify-center">
-      <div className="w-full max-w-lg space-y-6">
-        {bestMonth && (
-          <motion.div key="books" {...fadeInUp} className="text-center">
-            <p className="text-center max-w-1xl text-1xl md:text-3xl font-bold text-white text-center leading-tight">
-              Your favorite month was {bestMonth.name}!
-            </p>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 2.1 }}
-              className="text-center max-w-1xl text-1xl md:text-3xl font-bold text-white text-center leading-tight"
-            >
-              You gave it an average rating of {bestMonth.rating.toFixed(1)}
-            </motion.div>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 4.8 }}
-              className="text-center max-w-1xl text-1xl md:text-3xl font-bold text-white text-center leading-tight"
-            >
-              {bestMonth.message}
-            </motion.div>
-          </motion.div>
-        )}
-      </div>
+    <div className="min-h-screen w-full flex flex-col items-center justify-center text-center px-4">
+      <StatReveal delay={0}>
+        <h1 className="text-4xl md:text-6xl font-bold text-white mb-16">
+          {bestMonth.message}
+        </h1>
+      </StatReveal>
+
+      <StatReveal delay={1.5}>
+        <div className="mb-16">
+          <span className="text-3xl md:text-5xl font-bold text-white">
+            Your favorite month was {bestMonth.name}
+          </span>
+        </div>
+      </StatReveal>
+
+      <StatReveal delay={3}>
+        <div className="mb-16">
+          <span className="text-2xl md:text-4xl font-bold text-white">
+            ⭐️ You gave it an average rating of {bestMonth.rating.toFixed(1)}{" "}
+            stars ⭐️
+          </span>
+        </div>
+      </StatReveal>
     </div>
   );
 };
 
-// Default export with both components
-const BookTrends = { AverageRatings, FavMonth };
-
+const BookTrends = { AverageRatings, FavMonth, getBestMonth };
 export default BookTrends;
