@@ -7,6 +7,7 @@ from typing import Dict, List, Any, Optional
 from collections import defaultdict
 import time
 import requests
+import math
 
 def get_book_cover(isbn: str) -> Optional[str]:
     """
@@ -213,21 +214,18 @@ class GoodreadsDataProcessor:
         """
         Generate interesting time comparisons
         """
-        avg_marathon_pace = 4.5  # hours for average marathon completion
         taylor_song_avg = 3.5  # minutes per song
         baby_shark_length = 1.5  # minutes
         iss_orbit_time = 1.5  # hours per orbit
-        beaver_dam_time = 20  # hours per dam
+
 
         return [
-            f"Watching the entire Lord of the Rings trilogy {hours/11.4:.1f} times  💍",
-            f"Binging all seasons of The Office (US) {hours/73:.1f} times 📎 ",
-            f"Taking {hours/15:.1f} flights from NY to LA.",
-            f"Listening to Taylor Swift's entire discography {hours/(274 * taylor_song_avg / 60):.1f} times.",
-            f"Playing 'Baby Shark' {hours*60/baby_shark_length:.1f} times (doo doo doo... 🦈)",
-            f"The International Space Station could orbit Earth {hours/iss_orbit_time:.1f} times in that same time (assuming its not flat 👀)",
-            f"Running {hours/(avg_marathon_pace):.1f} marathons at an average pace of {avg_marathon_pace} hours.",
-            f"A beaver could build {hours/beaver_dam_time:.1f} dams (damn!)"
+            f"Watching the entire Lord of the Rings trilogy {math.ceil(hours/11.4):,} times  💍",
+            f"Binging all seasons of The Office (US) {math.ceil(hours/73):,} times 📎 ",
+            f"Taking {math.ceil(hours/15):,} flights from New York to Los Angeles 🛫",
+            f"Listening to Taylor Swift's entire discography {math.ceil(hours/(274 * taylor_song_avg / 60)):,} times 🎵",
+            f"Playing 'Baby Shark' {math.ceil(hours*60/baby_shark_length):,} times 🦈",
+            f"Watching the International Space Station orbit Earth {math.ceil(hours/iss_orbit_time):,} times 🚀"
         ]
 
     def _calculate_reading_pace(self, df_period):

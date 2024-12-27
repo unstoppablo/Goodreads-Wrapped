@@ -55,7 +55,7 @@ export const CoolStats = ({ data }) => {
   const [currentStage, setCurrentStage] = useState(0);
 
   useEffect(() => {
-    const timings = [3000, 8700, 9700, 6000]; // Only transition through first stage automatically
+    const timings = [3000, 8700, 9700, 6000];
 
     if (currentStage < 4) {
       const timer = setTimeout(() => {
@@ -66,137 +66,140 @@ export const CoolStats = ({ data }) => {
     }
   }, [currentStage]);
 
-  const fadeInUp = {
-    initial: { opacity: 0, y: 500 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -200 },
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+  const pageVariants = {
+    enter: { x: 300, opacity: 0 },
+    center: { x: 0, opacity: 1 },
+    exit: { x: -300, opacity: 0 },
   };
 
-  const fadeLeft = {
-    initial: { opacity: 0, y: 500 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, x: -200 },
-    transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
+  const pageTransition = {
+    duration: 0.5,
+    ease: [0.22, 1, 0.36, 1],
+  };
+
+  const Content = () => {
+    switch (currentStage) {
+      case 0:
+        return (
+          <motion.div
+            className="text-center"
+            initial="enter"
+            animate="center"
+            exit="exit"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <h2 className="text-4xl md:text-6xl font-bold text-white text-center leading-tight">
+              Now, some cool stats for you 📊
+            </h2>
+          </motion.div>
+        );
+
+      case 1:
+        return (
+          <motion.div
+            className="text-center space-y-8"
+            initial="enter"
+            animate="center"
+            exit="exit"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <h2 className="text-4xl md:text-6xl font-bold text-white text-center leading-tight">
+              Your most active months were 📚
+            </h2>
+            <div className="space-y-6">
+              {topMonthsByBooks.map((month, index) => (
+                <motion.div
+                  key={month.name}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{
+                    delay: index === 0 ? 1.5 : index === 1 ? 3.8 : 6.1,
+                  }}
+                  className="text-4xl md:text-6xl font-bold text-white text-center leading-tight"
+                >
+                  {month.name}: {month.count} book{month.count !== 1 ? "s" : ""}
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        );
+
+      case 2:
+        return (
+          <motion.div
+            className="text-center space-y-8"
+            initial="enter"
+            animate="center"
+            exit="exit"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <h2 className="text-4xl md:text-6xl font-bold text-white text-center leading-tight">
+              You read the most pages in 📖
+            </h2>
+            <div className="space-y-6">
+              {topMonthsByPages.map((month, index) => (
+                <motion.div
+                  key={month.name}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{
+                    delay: index === 0 ? 1.5 : index === 1 ? 3.8 : 6.1,
+                  }}
+                  className="text-4xl md:text-6xl font-bold text-white text-center leading-tight"
+                >
+                  {month.name}: {month.pages.toLocaleString()} pages
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        );
+
+      case 3:
+        return (
+          <motion.div
+            className="text-center"
+            initial="enter"
+            animate="center"
+            exit="exit"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <h2 className="text-4xl md:text-6xl font-bold text-white text-center leading-tight">
+              🏃‍♂️ On average, it took you approximately{" "}
+              {Math.round(data.Reading_Patterns.average_days_to_finish)} days to
+              finish a book ⏱️
+            </h2>
+          </motion.div>
+        );
+
+      case 4:
+        return (
+          <motion.div
+            className="text-center"
+            initial="enter"
+            animate="center"
+            exit="exit"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            <h2 className="text-4xl md:text-6xl font-bold text-white text-center leading-tight">
+              Nice! Let's continue 🥸
+            </h2>
+          </motion.div>
+        );
+
+      default:
+        return null;
+    }
   };
 
   return (
     <div className="h-full w-full flex items-center justify-center">
       <AnimatePresence mode="wait">
-        {currentStage === 0 && (
-          <motion.div key="intro" {...fadeInUp} className="text-center">
-            <h2 className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight">
-              Now, some cool stats for you
-            </h2>
-          </motion.div>
-        )}
-
-        {currentStage === 1 && (
-          <motion.div key="books" {...fadeLeft} className="text-center">
-            <h2 className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight">
-              Your most active months were
-            </h2>
-            {/* <p className="text-sm md:text-2xl text-white mb-8"> */}
-            <p className="text-center">
-              {topMonthsByBooks.map((month, index) => (
-                <p key={month.name}>
-                  {index === topMonthsByBooks.length - 1 ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 6.1 }}
-                      className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight"
-                    >
-                      {month.name}: {month.count} book
-                      {month.count !== 1 ? "s" : ""}
-                    </motion.div>
-                  ) : index === 0 ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 1.5 }}
-                      className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight"
-                    >
-                      {month.name}: {month.count} book
-                      {month.count !== 1 ? "s" : ""}
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 3.8 }}
-                      className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight"
-                    >
-                      {month.name}: {month.count} book
-                      {month.count !== 1 ? "s" : ""}
-                    </motion.div>
-                  )}
-                </p>
-              ))}{" "}
-            </p>
-          </motion.div>
-        )}
-
-        {currentStage === 2 && (
-          <motion.div key="pages" {...fadeLeft} className="text-center">
-            <h2 className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight">
-              You read the most pages in
-            </h2>
-            {/* <p className="text-sm md:text-2xl text-white mb-8"> */}
-            <p className="text-center">
-              {topMonthsByPages.map((month, index) => (
-                <p key={month.name}>
-                  {index === topMonthsByBooks.length - 1 ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 6.1 }}
-                      className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight"
-                    >
-                      {month.name}: {month.pages.toLocaleString()} pages
-                    </motion.div>
-                  ) : index === 0 ? (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 1.5 }}
-                      className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight"
-                    >
-                      {month.name}: {month.pages.toLocaleString()} pages
-                    </motion.div>
-                  ) : (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ delay: 3.8 }}
-                      className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight"
-                    >
-                      {month.name}: {month.pages.toLocaleString()} pages
-                    </motion.div>
-                  )}
-                </p>
-              ))}{" "}
-            </p>
-          </motion.div>
-        )}
-
-        {currentStage === 3 && (
-          <motion.div key="averages" {...fadeLeft} className="text-center">
-            <h2 className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight">
-              🏃‍♂️‍➡️ On average, it took you approximately{" "}
-              {Math.round(data.Reading_Patterns.average_days_to_finish)} days to
-              finish a book ⏱️
-            </h2>
-          </motion.div>
-        )}
-
-        {currentStage === 4 && (
-          <motion.div key="outro" {...fadeLeft} className="text-center">
-            <h2 className="max-w-1xl text-1xl md:text-4xl font-bold text-white text-center leading-tight">
-              Nice! Let's continue 🥸
-            </h2>
-          </motion.div>
-        )}
+        <Content key={currentStage} />
       </AnimatePresence>
     </div>
   );

@@ -1,78 +1,86 @@
-import React from "react";
-import {
-  Timer,
-  Plane,
-  Music2,
-  Play,
-  Orbit,
-  TreePine,
-  Film,
-  Baby,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const FunFacts = ({ data }) => {
+  const [currentStage, setCurrentStage] = useState(0);
   const comparisons = data.Time_Comparisons;
+  const totalHours = data.Basic_Statistics.estimated_hours.toFixed(1);
 
-  // Map fact types to icons
-  const getFactStyle = (fact) => {
-    if (fact.includes("Lord of the Rings")) {
-      return { icon: <Film className="w-6 h-6" /> };
+  // Split comparisons into groups of 3 for better mobile viewing
+  const comparisonGroups = [];
+  for (let i = 0; i < comparisons.length; i += 3) {
+    comparisonGroups.push(comparisons.slice(i, i + 3));
+  }
+
+  useEffect(() => {
+    const timings = [
+      8000, // First group
+    ];
+
+    if (currentStage < timings.length) {
+      const timer = setTimeout(() => {
+        setCurrentStage((prev) => prev + 1);
+      }, timings[currentStage]);
+
+      return () => clearTimeout(timer);
     }
-    if (fact.includes("Office")) {
-      return { icon: <Play className="w-6 h-6" /> };
+  }, [currentStage]);
+
+  const pageVariants = {
+    enter: { x: 300, opacity: 0 },
+    center: { x: 0, opacity: 1 },
+    exit: { x: -300, opacity: 0 },
+  };
+
+  const pageTransition = {
+    duration: 0.5,
+    ease: [0.22, 1, 0.36, 1],
+  };
+
+  const Content = () => {
+    switch (currentStage) {
+      case 0:
+      case 1: {
+        const groupIndex = currentStage;
+        const currentGroup = comparisonGroups[groupIndex];
+
+        return (
+          <motion.div
+            key={groupIndex}
+            className="space-y-6 w-full max-w-2xl"
+            initial="enter"
+            animate="center"
+            exit="exit"
+            variants={pageVariants}
+            transition={pageTransition}
+          >
+            {currentGroup.map((comparison, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.5 }}
+                className="rounded-lg p-6 text-white/80 flex items-center gap-6"
+              >
+                <div className="text-2xl md:text-4xl  text-white text-center leading-tight">
+                  {comparison}
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        );
+      }
+
+      default:
+        return null;
     }
-    if (fact.includes("flights")) {
-      return { icon: <Plane className="w-6 h-6" /> };
-    }
-    if (fact.includes("Taylor Swift")) {
-      return { icon: <Music2 className="w-6 h-6" /> };
-    }
-    if (fact.includes("Baby Shark")) {
-      return { icon: <Baby className="w-6 h-6" /> };
-    }
-    if (fact.includes("Space Station")) {
-      return { icon: <Orbit className="w-6 h-6" /> };
-    }
-    if (fact.includes("marathons")) {
-      return { icon: <Timer className="w-6 h-6" /> };
-    }
-    if (fact.includes("beaver")) {
-      return { icon: <TreePine className="w-6 h-6" /> };
-    }
-    // Default style
-    return { icon: <Timer className="w-6 h-6" /> };
   };
 
   return (
-    <div className="space-y-4">
-      {/* Time spent reading card */}
-      <div className="mb-4">
-        <p className="text-white-600">
-          You've spent approximately{" "}
-          <span className="font-bold text-lg">
-            {data.Basic_Statistics.estimated_hours.toFixed(1)} hours
-          </span>{" "}
-          reading this year. That's equivalent to:
-        </p>
-      </div>
-      {/* Fun comparisons */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {comparisons.map((comparison, index) => {
-          const factStyle = getFactStyle(comparison);
-
-          return (
-            <div
-              key={index}
-              className="rounded-lg p-4 border bg-blue-50 border-blue-200 text-blue-700 flex items-center gap-4"
-            >
-              <div className="flex-shrink-0 flex items-center justify-center">
-                {factStyle.icon}
-              </div>
-              <div className="flex-1 min-w-0 text-left">{comparison}</div>
-            </div>
-          );
-        })}
-      </div>
+    <div className="h-full w-full flex items-center justify-center p-4">
+      <AnimatePresence mode="wait">
+        <Content key={currentStage} />
+      </AnimatePresence>
     </div>
   );
 };

@@ -78,22 +78,24 @@ export const AverageRatings = ({ data }) => {
   const getRatingMessage = (rating) => {
     if (rating >= 3.8) {
       return {
-        message:
-          "You have excellent taste in books! Your high average rating shows you're great at picking books you'll enjoy.",
-        className: "bg-green-950/50 border border-green-900/30 text-green-200",
+        message: [
+          "You have excellent taste in books!",
+          "Your high average rating shows you're great at picking books you'll enjoy.",
+        ],
       };
     } else if (rating >= 3.2) {
       return {
-        message:
-          "You're a balanced reader who's not afraid to be critical. Your ratings show thoughtful consideration of each book.",
-        className: "bg-blue-950/50 border border-blue-900/30 text-blue-200",
+        message: [
+          "You're a balanced reader who's not afraid to be critical.",
+          "Your ratings show thoughtful consideration of each book.",
+        ],
       };
     } else {
       return {
-        message:
-          "Looks like it's been a challenging reading year. Remember, being critical is good - it means you have high standards!",
-        className:
-          "bg-purple-950/50 border border-purple-900/30 text-purple-200",
+        message: [
+          "Looks like it's been a challenging reading year.",
+          "Remember, being critical is good - it means you have high standards!",
+        ],
       };
     }
   };
@@ -111,7 +113,7 @@ export const AverageRatings = ({ data }) => {
       <StatReveal delay={1}>
         <div className="mb-16">
           <span className="text-6xl md:text-8xl font-bold text-white">
-            {average_rating.toFixed(1)}
+            ⭐️ {average_rating.toFixed(1)} ⭐️
           </span>
           <p className="text-lg md:text-xl text-gray-400 mt-2">
             average rating
@@ -120,12 +122,12 @@ export const AverageRatings = ({ data }) => {
       </StatReveal>
 
       <StatReveal delay={2.5}>
-        <div
-          className={`text-lg md:text-xl max-w-2xl p-6 rounded-lg ${
-            getRatingMessage(average_rating).className
-          }`}
-        >
-          {getRatingMessage(average_rating).message}
+        <div className="text-2xl md:text-4xl text-white">
+          {getRatingMessage(average_rating).message.map((line, index) => (
+            <p key={index} className="text-center mb-5">
+              {line}
+            </p>
+          ))}
         </div>
       </StatReveal>
     </div>

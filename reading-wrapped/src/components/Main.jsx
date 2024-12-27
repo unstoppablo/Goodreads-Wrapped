@@ -33,6 +33,11 @@ const Main = ({ data }) => {
       component: ReadingPercentile,
     },
     {
+      title: "That's equivalent to...",
+      id: "fun_facts",
+      component: FunFacts,
+    },
+    {
       title: "",
       id: "cool_stats",
       component: CoolStats,
@@ -56,6 +61,18 @@ const Main = ({ data }) => {
       },
     },
     {
+      id: "longest_book",
+      title: "",
+      description: "The book with the most pages you've read",
+      component: (props) => <BookExtremes {...props} type="longest" />,
+    },
+    {
+      id: "shortest_book",
+      title: "",
+      description: "The book with the least pages you've read",
+      component: (props) => <BookExtremes {...props} type="shortest" />,
+    },
+    {
       title: "",
       id: "top_books",
       component: (props) => <BookListing {...props} sortOrder="desc" />,
@@ -64,16 +81,6 @@ const Main = ({ data }) => {
       title: "",
       id: "worst_books",
       component: (props) => <BookListing {...props} sortOrder="asc" />,
-    },
-    {
-      title: "Your Longest vs Shortest Book",
-      id: "longest_and_shortest",
-      component: BookExtremes,
-    },
-    {
-      title: "Some Neat Facts",
-      id: "fun_facts",
-      component: FunFacts,
     },
     {
       title: "",
@@ -137,7 +144,7 @@ const Main = ({ data }) => {
         {/* Page Content */}
         <div className="flex-1 w-full flex items-center justify-center px-4">
           {currentTitle && (
-            <h2 className="absolute top-16 left-0 right-0 text-xl md:text-2xl font-semibold text-white text-center">
+            <h2 className="absolute top-16 left-0 right-0 text-3xl md:text-5xl font-bold text-white text-center mt-10">
               {currentTitle}
             </h2>
           )}

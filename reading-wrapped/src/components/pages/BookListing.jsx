@@ -1,5 +1,6 @@
 import React from "react";
 import { Star } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Popover,
   PopoverContent,
@@ -42,7 +43,6 @@ const BookListing = ({
     );
   };
 
-  // Get month name if month is provided
   const getMonthName = (monthNum) => {
     const date = new Date();
     date.setMonth(monthNum - 1);
@@ -57,74 +57,131 @@ const BookListing = ({
       if (bookCount === 1) return `Your ${monthName} fav ✨`;
       return `Your ${monthName} favs ✨`;
     }
-    return sortOrder === "desc" ? "Your Top Books" : "Your Least-Liked Books";
+    return sortOrder === "desc" ? "Your top books ❤️" : "Your flop books 👎";
+  };
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, x: 300 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+    exit: {
+      opacity: 0,
+      x: -300,
+      transition: {
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
+  };
+
+  const listContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+      },
+    },
+  };
+
+  const listItemVariants = {
+    hidden: { opacity: 0, x: 50 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: {
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1],
+      },
+    },
   };
 
   if (sortedBooks.length === 1) {
     const book = sortedBooks[0];
     return (
-      <div className="w-full">
-        <h1 className="text-4xl md:text-6xl font-bold text-white text-center mb-16">
-          {getTitle()}
-        </h1>
-        <div className="flex flex-col items-center max-w-xl mx-auto">
-          {/* Large centered book cover */}
-          <img
-            src={book.cover_url || bookNotFound}
-            alt={`Cover of ${book.title}`}
-            className="w-40 h-64 object-cover rounded-lg shadow-lg mb-8"
-          />
-
-          {/* Book details below */}
-          <div className="text-center space-y-4">
-            <h3 className="text-2xl font-bold text-white">{book.title}</h3>
-            <p className="text-lg text-gray-400">by {book.author}</p>
-            <div className="flex justify-center items-center gap-4">
-              <RatingStars rating={book.rating} size="large" />
-              <span className="text-gray-400">{book.pages} pages</span>
-            </div>
-            {book.review && (
-              <Popover>
-                <PopoverTrigger className="text-blue-400 hover:text-blue-300 text-lg">
-                  Read review
-                </PopoverTrigger>
-                <PopoverContent className="w-96">
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-base">Review</h4>
-                    <div className="max-h-60 overflow-y-auto">
-                      <div className="text-gray-600">
-                        {book.review.split("<br/>").map((paragraph, i) => (
-                          <p key={i} className="mb-3 last:mb-0">
-                            {paragraph}
-                          </p>
-                        ))}
+      <AnimatePresence mode="wait">
+        <motion.div
+          className="w-full"
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
+          <h1 className="text-4xl md:text-6xl font-bold text-white text-center mb-16">
+            {getTitle()}
+          </h1>
+          <div className="flex flex-col items-center max-w-xl mx-auto">
+            <img
+              src={book.cover_url || bookNotFound}
+              alt={`Cover of ${book.title}`}
+              className="w-40 h-64 object-cover rounded-lg shadow-lg mb-8"
+            />
+            <div className="text-center space-y-4">
+              <h3 className="text-2xl font-bold text-white">{book.title}</h3>
+              <p className="text-lg text-gray-400">by {book.author}</p>
+              <div className="flex justify-center items-center gap-4">
+                <RatingStars rating={book.rating} size="large" />
+                <span className="text-gray-400">{book.pages} pages</span>
+              </div>
+              {book.review && (
+                <Popover>
+                  <PopoverTrigger className="text-blue-400 hover:text-blue-300 text-lg">
+                    Read review
+                  </PopoverTrigger>
+                  <PopoverContent className="w-96">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-base">Review</h4>
+                      <div className="max-h-60 overflow-y-auto">
+                        <div className="text-gray-600">
+                          {book.review.split("<br/>").map((paragraph, i) => (
+                            <p key={i} className="mb-3 last:mb-0">
+                              {paragraph}
+                            </p>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </PopoverContent>
-              </Popover>
-            )}
+                  </PopoverContent>
+                </Popover>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+        </motion.div>
+      </AnimatePresence>
     );
   }
 
   return (
-    <div className="space-y-3">
-      <h1 className="text-4xl md:text-6xl font-bold text-white text-center mb-5">
+    <motion.div
+      className="space-y-8"
+      variants={listContainerVariants}
+      initial="hidden"
+      animate="visible"
+    >
+      <motion.h1
+        className="text-4xl md:text-6xl font-bold text-white text-center"
+        variants={listItemVariants}
+      >
         {getTitle()}
-      </h1>
+      </motion.h1>
       {sortedBooks.map((book, index) => (
-        <div key={`${book.title}-${index}`} className="flex gap-3 p-3 ">
-          {/* Book Cover */}
+        <motion.div
+          key={`${book.title}-${index}`}
+          className="flex gap-3 p-3"
+          variants={listItemVariants}
+        >
           <img
             src={book.cover_url || bookNotFound}
             alt={`Cover of ${book.title}`}
             className="w-20 h-28 object-cover rounded-md shadow-sm flex-shrink-0"
           />
-
-          {/* Book Details - Using justify-between for even spacing */}
           <div className="flex flex-col items-start justify-between h-28">
             <h3 className="text-2xl md:text-3xl font-bold text-white text-center">
               {book.title}
@@ -156,9 +213,9 @@ const BookListing = ({
               </Popover>
             )}
           </div>
-        </div>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 };
 
