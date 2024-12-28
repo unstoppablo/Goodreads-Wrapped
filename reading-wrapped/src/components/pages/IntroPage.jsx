@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const IntroPage = () => {
+const IntroPage = ({ onPageComplete }) => {
   const [currentStage, setCurrentStage] = useState(0);
 
   useEffect(() => {
@@ -15,6 +15,18 @@ const IntroPage = () => {
       return () => clearTimeout(timer);
     }
   }, [currentStage]);
+
+  // Trigger page complete when reaching the final stage
+  useEffect(() => {
+    if (currentStage === 2 && onPageComplete) {
+      // Add a slight delay to ensure the final stage is visible
+      const completeTimer = setTimeout(() => {
+        onPageComplete();
+      }, 3000); // 3 seconds after reaching the final stage
+
+      return () => clearTimeout(completeTimer);
+    }
+  }, [currentStage, onPageComplete]);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },

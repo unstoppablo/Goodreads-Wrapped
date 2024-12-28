@@ -1,7 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import Overview from "./pages/Overview";
-// import ReadingJourney from "./pages/ReadingJourney";
 import GoodbyePage from "./pages/Goodbye";
 import BookListing from "./pages/BookListing";
 import BookExtremes from "./pages/BookExtremes";
@@ -15,6 +14,8 @@ import BookTrends from "./pages/BookTrends";
 
 const Main = ({ data }) => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  const [pageCompletionStatus, setPageCompletionStatus] = useState([]);
 
   const pages = [
     {
@@ -94,7 +95,19 @@ const Main = ({ data }) => {
     },
   ];
 
-  const [currentPageIndex, setCurrentPageIndex] = useState(0);
+  // Initialize page completion status when component mounts
+  useEffect(() => {
+    setPageCompletionStatus(new Array(pages.length).fill(false));
+  }, [pages.length]);
+
+  // Function to mark a page as completed
+  const markPageAsCompleted = (pageIndex) => {
+    setPageCompletionStatus((prev) => {
+      const newStatus = [...prev];
+      newStatus[pageIndex] = true;
+      return newStatus;
+    });
+  };
 
   const goToNextPage = () => {
     setCurrentPageIndex((prev) =>
@@ -103,11 +116,39 @@ const Main = ({ data }) => {
   };
 
   const goToPrevPage = () => {
-    setCurrentPageIndex((prev) => (prev === 0 ? prev : prev - 1));
+    if (currentPageIndex > 0) {
+      // Only proceed if we're not on the first page
+      const newIndex = currentPageIndex - 1;
+      setCurrentPageIndex(newIndex);
+      // Reset completion status for all pages after the one we're moving to
+      setPageCompletionStatus((prev) => {
+        const newStatus = [...prev];
+        for (let i = newIndex + 1; i < newStatus.length; i++) {
+          newStatus[i] = false;
+        }
+        return newStatus;
+      });
+    }
   };
 
   const CurrentPage = pages[currentPageIndex].component;
   const currentTitle = pages[currentPageIndex].title;
+
+  // Using this to deal with infinite animation retriggering when passing onPageComplete props to these pages. Lazy fix.
+  useEffect(() => {
+    if (
+      [
+        "fav_month_books",
+        "longest_book",
+        "shortest_book",
+        "top_books",
+        "worst_books",
+        "final_page",
+      ].includes(pages[currentPageIndex].id)
+    ) {
+      markPageAsCompleted(currentPageIndex);
+    }
+  }, [currentPageIndex]);
 
   return (
     <div className="w-full min-h-screen relative overflow-hidden bg-gray-950">
@@ -140,9 +181,28 @@ const Main = ({ data }) => {
           {pages.map((page, index) => (
             <div
               key={`${page.id}-${index}`}
-              className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full transition-colors
-                ${index === currentPageIndex ? "bg-blue-400" : "bg-gray-700"}`}
-            />
+              className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full relative overflow-hidden transition-colors
+        ${
+          index === currentPageIndex
+            ? ["fav_month_books", "top_books", "worst_books"].includes(page.id)
+              ? "bg-green-500"
+              : "bg-blue-400"
+            : pageCompletionStatus[index]
+            ? "bg-green-500"
+            : "bg-gray-700"
+        }`}
+            >
+              {/* Completion animation bar */}
+              {pageCompletionStatus[index] && (
+                <div
+                  className="absolute left-0 top-0 h-full w-full bg-green-500 origin-left animate-progress-fill"
+                  style={{
+                    animationDuration: "1s",
+                    transformOrigin: "left",
+                  }}
+                />
+              )}
+            </div>
           ))}
         </div>
 
@@ -156,7 +216,10 @@ const Main = ({ data }) => {
 
           <div className="w-full text-white">
             {CurrentPage ? (
-              <CurrentPage data={data} />
+              <CurrentPage
+                data={data}
+                onPageComplete={() => markPageAsCompleted(currentPageIndex)}
+              />
             ) : (
               <p className="text-gray-400 text-center">
                 Content coming soon...

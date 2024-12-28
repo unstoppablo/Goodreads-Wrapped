@@ -62,7 +62,7 @@ const StatItem = ({ number, label }) => (
   </motion.div>
 );
 
-const Overview = ({ data }) => {
+const Overview = ({ data, onPageComplete }) => {
   const { Basic_Statistics: basicStats } = data;
   const [showStats, setShowStats] = useState(false);
 
@@ -70,6 +70,18 @@ const Overview = ({ data }) => {
     const timer = setTimeout(() => setShowStats(true), 200);
     return () => clearTimeout(timer);
   }, []);
+
+  // Trigger page complete after animations are done
+  useEffect(() => {
+    if (showStats && onPageComplete) {
+      // Add a slight delay to ensure all animations are complete
+      const completeTimer = setTimeout(() => {
+        onPageComplete();
+      }, 5000); // 5 seconds after stats are shown to allow for full animation
+
+      return () => clearTimeout(completeTimer);
+    }
+  }, [showStats, onPageComplete]);
 
   if (!showStats) return null;
 

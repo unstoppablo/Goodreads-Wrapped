@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const FunFacts = ({ data }) => {
+const FunFacts = ({ data, onPageComplete }) => {
   const [currentStage, setCurrentStage] = useState(0);
+  const [isComplete, setIsComplete] = useState(false); // Add this to track completion
   const comparisons = data.Time_Comparisons;
   const totalHours = data.Basic_Statistics.estimated_hours.toFixed(1);
 
@@ -13,18 +14,17 @@ const FunFacts = ({ data }) => {
   }
 
   useEffect(() => {
-    const timings = [
-      8000, // First group
-    ];
-
-    if (currentStage < timings.length) {
+    if (currentStage === 0) {
+      // Only trigger for first stage
       const timer = setTimeout(() => {
-        setCurrentStage((prev) => prev + 1);
-      }, timings[currentStage]);
+        setCurrentStage(1);
+        setIsComplete(true); // Mark as complete after moving to stage 1
+        onPageComplete?.(); // Trigger completion callback
+      }, 8000);
 
       return () => clearTimeout(timer);
     }
-  }, [currentStage]);
+  }, [currentStage, onPageComplete]);
 
   const pageVariants = {
     enter: { x: 300, opacity: 0 },
