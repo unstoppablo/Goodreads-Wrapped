@@ -66,14 +66,26 @@ const StatReveal = ({ children, delay }) => (
   </motion.div>
 );
 
-export const AverageRatings = ({ data }) => {
+export const AverageRatings = ({ data, onPageComplete }) => {
   const { average_rating, rating_distribution } = data.Rating_Statistics;
   const [showStats, setShowStats] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowStats(true), 500);
     return () => clearTimeout(timer);
   }, []);
+
+  // Add completion effect after all animations
+  useEffect(() => {
+    if (showStats && !isComplete) {
+      const timer = setTimeout(() => {
+        setIsComplete(true);
+        onPageComplete?.();
+      }, 4000); // Adjust timing based on your animations
+      return () => clearTimeout(timer);
+    }
+  }, [showStats, isComplete, onPageComplete]);
 
   const getRatingMessage = (rating) => {
     if (rating >= 3.8) {
@@ -134,13 +146,25 @@ export const AverageRatings = ({ data }) => {
   );
 };
 
-export const FavMonth = ({ data }) => {
+export const FavMonth = ({ data, onPageComplete }) => {
   const [showStats, setShowStats] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowStats(true), 500);
     return () => clearTimeout(timer);
   }, []);
+
+  // Add completion effect after all animations
+  useEffect(() => {
+    if (showStats && !isComplete) {
+      const timer = setTimeout(() => {
+        setIsComplete(true);
+        onPageComplete?.();
+      }, 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [showStats, isComplete, onPageComplete]);
 
   const bestMonth = getBestMonth(data);
   if (!showStats || !bestMonth) return null;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const GoodbyePage = () => {
+const GoodbyePage = ({ onPageComplete }) => {
   const [currentStage, setCurrentStage] = useState(0);
 
   useEffect(() => {
@@ -15,6 +15,16 @@ const GoodbyePage = () => {
       return () => clearTimeout(timer);
     }
   }, [currentStage]);
+
+  useEffect(() => {
+    if (currentStage === 2 && onPageComplete) {
+      const completeTimer = setTimeout(() => {
+        onPageComplete();
+      }, 3000);
+
+      return () => clearTimeout(completeTimer);
+    }
+  }, [currentStage, onPageComplete]);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -49,7 +59,7 @@ const GoodbyePage = () => {
         {currentStage === 2 && (
           <motion.div key="ready" {...fadeInUp} className="text-center">
             <p className="max-w-2xl text-3xl md:text-5xl font-bold text-center leading-tight">
-              Let's see a summary of your reading journey this year 😃
+              Here's a shareable summary of your reading journey this year 😃
             </p>
           </motion.div>
         )}

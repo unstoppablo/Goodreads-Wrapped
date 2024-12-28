@@ -116,11 +116,39 @@ const Main = ({ data }) => {
   };
 
   const goToPrevPage = () => {
-    setCurrentPageIndex((prev) => (prev === 0 ? prev : prev - 1));
+    if (currentPageIndex > 0) {
+      // Only proceed if we're not on the first page
+      const newIndex = currentPageIndex - 1;
+      setCurrentPageIndex(newIndex);
+      // Reset completion status for all pages after the one we're moving to
+      setPageCompletionStatus((prev) => {
+        const newStatus = [...prev];
+        for (let i = newIndex + 1; i < newStatus.length; i++) {
+          newStatus[i] = false;
+        }
+        return newStatus;
+      });
+    }
   };
 
   const CurrentPage = pages[currentPageIndex].component;
   const currentTitle = pages[currentPageIndex].title;
+
+  // Using this to deal with infinite animation retriggering when passing onPageComplete props to these pages. Lazy fix.
+  useEffect(() => {
+    if (
+      [
+        "fav_month_books",
+        "longest_book",
+        "shortest_book",
+        "top_books",
+        "worst_books",
+        "final_page",
+      ].includes(pages[currentPageIndex].id)
+    ) {
+      markPageAsCompleted(currentPageIndex);
+    }
+  }, [currentPageIndex]);
 
   return (
     <div className="w-full min-h-screen relative overflow-hidden bg-gray-950">
@@ -156,7 +184,9 @@ const Main = ({ data }) => {
               className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full relative overflow-hidden transition-colors
         ${
           index === currentPageIndex
-            ? "bg-blue-400"
+            ? ["fav_month_books", "top_books", "worst_books"].includes(page.id)
+              ? "bg-green-500"
+              : "bg-blue-400"
             : pageCompletionStatus[index]
             ? "bg-green-500"
             : "bg-gray-700"

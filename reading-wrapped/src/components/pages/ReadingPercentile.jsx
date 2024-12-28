@@ -26,7 +26,7 @@ function calculatePercentile(hours) {
   return 1;
 }
 
-const ReadingPercentile = ({ data }) => {
+const ReadingPercentile = ({ data, onPageComplete }) => {
   const [stage, setStage] = useState(0);
   const hours = Math.round(data.Basic_Statistics.estimated_hours);
   const percentile = calculatePercentile(hours);
@@ -35,12 +35,25 @@ const ReadingPercentile = ({ data }) => {
     return num >= 1000 ? num.toLocaleString() : num;
   };
 
+  // Handle stage transition
   useEffect(() => {
     if (stage === 0) {
       const timer = setTimeout(() => setStage(1), 3500);
       return () => clearTimeout(timer);
     }
   }, [stage]);
+
+  // Handle page completion
+  useEffect(() => {
+    if (stage === 1) {
+      // Wait for the animations to complete before triggering page completion
+      const completionTimer = setTimeout(() => {
+        onPageComplete?.();
+      }, 2000); // Adjust timing to account for animations
+
+      return () => clearTimeout(completionTimer);
+    }
+  }, [stage, onPageComplete]);
 
   const shakeEmoji = {
     initial: { scale: 1 },

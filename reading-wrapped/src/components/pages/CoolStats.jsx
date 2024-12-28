@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export const CoolStats = ({ data }) => {
+export const CoolStats = ({ data, onPageComplete }) => {
   const months = [
     { name: "January", shortName: "Jan", key: "2024-01" },
     { name: "February", shortName: "Feb", key: "2024-02" },
@@ -53,18 +53,27 @@ export const CoolStats = ({ data }) => {
     }));
 
   const [currentStage, setCurrentStage] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
     const timings = [3000, 8700, 9700, 6000];
 
     if (currentStage < 4) {
       const timer = setTimeout(() => {
-        setCurrentStage((prev) => prev + 1);
+        setCurrentStage(currentStage + 1);
       }, timings[currentStage]);
 
       return () => clearTimeout(timer);
     }
   }, [currentStage]);
+
+  // Separate effect to handle completion
+  useEffect(() => {
+    if (currentStage === 4 && !isComplete) {
+      setIsComplete(true);
+      onPageComplete?.();
+    }
+  }, [currentStage, isComplete, onPageComplete]);
 
   const pageVariants = {
     enter: { x: 300, opacity: 0 },
