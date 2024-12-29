@@ -1,0 +1,6 @@
+flask
+pandas
+numpy
+requests
+flask_limiter
+python-dotenv
