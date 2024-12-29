@@ -193,7 +193,7 @@ class GoodreadsDataProcessor:
                 'title': self._clean_title(row['Title']),
                 'author': row['Author'],
                 'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
-                'pages': int(row['Number of Pages']) if pd.notna(row['Number of Pages']) else None,
+                "pages": int(float(row['Number of Pages'])) if pd.notna(row['Number of Pages']) else None,
                 'date_read': row['Date Read'].strftime('%Y-%m-%d'),
                 'review': self._clean_review_text(row['My Review']) if pd.notna(row['My Review']) else None,
                 'isbn': row['ISBN'] if pd.notna(row['ISBN']) else None,
