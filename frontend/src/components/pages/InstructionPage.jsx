@@ -77,40 +77,34 @@ const InstructionPage = ({ onPageComplete }) => {
   const handleProceed = async () => {
     if (isValidated && file) {
       try {
-        console.log("File size before sending:", file.size);
-        const fileReader = new FileReader();
-        fileReader.onload = async (e) => {
-          const content = e.target.result;
-          console.log("File content length:", content.length);
-        };
-        fileReader.readAsText(file);
-        console.log("Starting analysis");
         setIsAnalyzing(true);
         setProgress(0);
 
         const formData = new FormData();
         formData.append("file", file);
 
-        // Log the formData contents
-        const formDataEntries = Array.from(formData.entries());
-        console.log("FormData contents:", formDataEntries);
-
         const API_BASE_URL =
           import.meta.env.VITE_API_BASE_URL || "http://192.168.50.232:5001";
 
-        console.log("Sending request to:", `${API_BASE_URL}/analyze`);
         const response = await fetch(`${API_BASE_URL}/analyze`, {
           method: "POST",
           body: formData,
         });
 
-        console.log("Response received:", response.status);
-        const result = await response.json();
-        console.log("Analysis result:", result);
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
 
-        setTimeout(() => {
-          onPageComplete(result);
-        }, 1000);
+        const result = await response.json();
+
+        if (result === "No books found in the specified date range.") {
+          setAnalysisError("No books found in the specified date range.");
+          setProgress(0);
+          return;
+        }
+
+        setProgress(100);
+        setIsReady(true);
+        onPageComplete(result);
       } catch (err) {
         setAnalysisError(err.message);
         setProgress(0);

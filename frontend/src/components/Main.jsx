@@ -19,8 +19,6 @@ const Main = () => {
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageCompletionStatus, setPageCompletionStatus] = useState([]);
 
-  const [analysisPromise, setAnalysisPromise] = useState(null);
-
   const handleInstructionComplete = (result) => {
     setData(result);
     setCurrentPageIndex(1);
