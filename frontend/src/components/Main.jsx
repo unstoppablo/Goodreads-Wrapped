@@ -11,6 +11,8 @@ import IntroPage from "./pages/IntroPage";
 import ReadingPercentile from "./pages/ReadingPercentile";
 import CoolStats from "./pages/CoolStats";
 import BookTrends from "./pages/BookTrends";
+import InstructionPage from "./pages/InstructionPage";
+import LoadingPage from "./pages/LoadingPage";
 
 const Main = ({ data }) => {
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
@@ -18,6 +20,16 @@ const Main = ({ data }) => {
   const [pageCompletionStatus, setPageCompletionStatus] = useState([]);
 
   const pages = [
+    {
+      title: "",
+      id: "instructions",
+      component: InstructionPage,
+    },
+    {
+      title: "",
+      id: "loading",
+      component: LoadingPage,
+    },
     {
       title: "",
       id: "intro",
