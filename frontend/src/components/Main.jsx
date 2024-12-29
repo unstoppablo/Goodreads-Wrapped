@@ -12,23 +12,30 @@ import ReadingPercentile from "./pages/ReadingPercentile";
 import CoolStats from "./pages/CoolStats";
 import BookTrends from "./pages/BookTrends";
 import InstructionPage from "./pages/InstructionPage";
-import LoadingPage from "./pages/LoadingPage";
 
-const Main = ({ data }) => {
+const Main = () => {
+  const [data, setData] = useState(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageCompletionStatus, setPageCompletionStatus] = useState([]);
+
+  const [analysisPromise, setAnalysisPromise] = useState(null);
+
+  const handleInstructionComplete = (result) => {
+    setData(result);
+    setCurrentPageIndex(1);
+  };
 
   const pages = [
     {
       title: "",
       id: "instructions",
-      component: InstructionPage,
-    },
-    {
-      title: "",
-      id: "loading",
-      component: LoadingPage,
+      component: (props) => (
+        <InstructionPage
+          {...props}
+          onPageComplete={handleInstructionComplete}
+        />
+      ),
     },
     {
       title: "",
@@ -122,17 +129,17 @@ const Main = ({ data }) => {
   };
 
   const goToNextPage = () => {
+    if (!data && currentPageIndex === 0) return; // Block navigation on instructions until data exists
     setCurrentPageIndex((prev) =>
       prev === pages.length - 1 ? prev : prev + 1
     );
   };
 
   const goToPrevPage = () => {
+    if (!data && currentPageIndex === 0) return;
     if (currentPageIndex > 0) {
-      // Only proceed if we're not on the first page
       const newIndex = currentPageIndex - 1;
       setCurrentPageIndex(newIndex);
-      // Reset completion status for all pages after the one we're moving to
       setPageCompletionStatus((prev) => {
         const newStatus = [...prev];
         for (let i = newIndex + 1; i < newStatus.length; i++) {
@@ -227,15 +234,15 @@ const Main = ({ data }) => {
           )}
 
           <div className="w-full text-white">
-            {CurrentPage ? (
+            {CurrentPage && data ? (
               <CurrentPage
                 data={data}
                 onPageComplete={() => markPageAsCompleted(currentPageIndex)}
               />
             ) : (
-              <p className="text-gray-400 text-center">
-                Content coming soon...
-              </p>
+              <CurrentPage
+                onPageComplete={() => markPageAsCompleted(currentPageIndex)}
+              />
             )}
           </div>
         </div>

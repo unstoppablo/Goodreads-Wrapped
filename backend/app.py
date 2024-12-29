@@ -7,7 +7,7 @@ import os
 from process_data import GoodreadsDataProcessor
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 limiter = Limiter(
     get_remote_address,
@@ -36,9 +36,11 @@ def add_security_headers(response):
 def test():
     return jsonify({"status": "working"})
 
-@app.route('/analyze', methods=['POST'])
+@app.route('/validate', methods=['POST'])
 @limiter.limit("10 per minute")
-def analyze_file():
+def validate_file():
+    print("Validate route hit!")
+    print("Request files:", request.files)
     if 'file' not in request.files:
         return jsonify({'error': 'No file uploaded'}), 400
         
@@ -53,13 +55,39 @@ def analyze_file():
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
         file.save(filepath)
         processor = GoodreadsDataProcessor(filepath)
-        stats = processor.get_statistics( start_date='2024-01-01', end_date='2024-12-31')
-        return jsonify(stats)
+        
+        validation_result = processor.validate_goodreads_csv()
+        return jsonify(validation_result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
     finally:
         if os.path.exists(filepath):
             os.remove(filepath)
 
+@app.route('/analyze', methods=['POST'])
+@limiter.limit("10 per minute")
+def analyze_file():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file uploaded'}), 400
+        
+    file = request.files['file']
+    file.stream.seek(0)  # Rewind the file pointer
+    
+    filename = secure_filename(file.filename.replace(" ", "_"))
+    filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+
+    try:
+        os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+        file.save(filepath)
+        # Add debug print
+        print(f"File saved, size: {os.path.getsize(filepath)}")
+        processor = GoodreadsDataProcessor(filepath)
+        stats = processor.get_statistics(start_date='2024-01-01', end_date='2024-12-31')
+        return jsonify(stats)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+    finally:
+        if os.path.exists(filepath):
+            os.remove(filepath)
 if __name__ == '__main__':
   app.run(debug=False, host='0.0.0.0', port=5001)
