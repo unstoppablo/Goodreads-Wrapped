@@ -3,8 +3,7 @@ from datetime import datetime
 import numpy as np
 import re
 import json
-from typing import Dict, List, Any, Optional
-from collections import defaultdict
+from typing import Dict,Optional
 import time
 import requests
 import math
@@ -18,26 +17,32 @@ def get_book_cover(isbn: str) -> Optional[str]:
     start_time = time.time()
 
     if not isbn or pd.isna(isbn):
+        print(f"Skipping cover fetch - Invalid ISBN: {isbn}")
         return None
         
-    # Clean ISBN - remove hyphens and spaces
-    isbn = str(isbn).replace('-', '').replace(' ', '')
+    # Clean ISBN - remove Excel formatting, hyphens, and spaces
+    isbn = str(isbn).replace('="', '').replace('"', '').replace('-', '').replace(' ', '')
+    print(f"Attempting cover fetch for ISBN: {isbn}")
     
     # 1. Try Open Library API first
     openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
     
     try:
-        response = requests.head(openlibrary_url)
+        response = requests.head(openlibrary_url, timeout=5)
+        print(f"OpenLibrary response status: {response.status_code}")
+        print(f"OpenLibrary content length: {response.headers.get('content-length', 0)}")
+        
         if response.status_code == 200 and int(response.headers.get('content-length', 0)) > 1000:
             print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (OpenLibrary success)")
             return openlibrary_url
-    except:
-        pass
+    except Exception as e:
+        print(f"OpenLibrary error: {str(e)}")
     
     # 2. Try Google Books API as fallback
     try:
         google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-        response = requests.get(google_url)
+        response = requests.get(google_url, timeout=5)
+        print(f"Google Books response status: {response.status_code}")
         
         if response.status_code == 200:
             data = response.json()
@@ -47,10 +52,11 @@ def get_book_cover(isbn: str) -> Optional[str]:
                     if size in image_links:
                         print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (Google Books success)")
                         return image_links[size]
-    except:
-        pass
+            print("Google Books response contained no image links")
+    except Exception as e:
+        print(f"Google Books error: {str(e)}")
+    
     print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (No cover found)")
-
     return None
 
 
