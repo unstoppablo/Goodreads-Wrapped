@@ -1,0 +1,492 @@
+{
+  "Time_Period": {
+    "start": "2024-01-01",
+    "end": "2024-12-31"
+  },
+  "Basic_Statistics": {
+    "total_books": 22,
+    "total_pages": 7282,
+    "estimated_words": 1820500,
+    "estimated_hours": 303.4166666666667,
+    "estimated_days": 12.642361111111112
+  },
+  "Rating_Statistics": {
+    "average_rating": 3.272727272727273,
+    "rating_distribution": {
+      "2": 4,
+      "3": 11,
+      "4": 4,
+      "5": 3
+    }
+  },
+  "Reading_Patterns": {
+    "books_per_month": {
+      "2024-01": 3,
+      "2024-02": 1,
+      "2024-03": 2,
+      "2024-04": 3,
+      "2024-05": 1,
+      "2024-06": 3,
+      "2024-07": 1,
+      "2024-08": 2,
+      "2024-09": 1,
+      "2024-10": 2,
+      "2024-11": 3
+    },
+    "average_days_to_finish": 14.454545454545455
+  },
+  "Time_Comparisons": [
+    "Watching the entire Lord of the Rings trilogy 27 times  💍",
+    "Binging all seasons of The Office (US) 5 times 📎 ",
+    "Taking 21 flights from New York to Los Angeles 🛫",
+    "Listening to Taylor Swift's entire discography 19 times 🎵",
+    "Playing 'Baby Shark' 12,137 times 🦈",
+    "Watching the International Space Station orbit Earth 203 times 🚀"
+  ],
+  "Book_Extremes": {
+    "longest_book": {
+      "title": "La sombra del viento",
+      "author": "Carlos Ruiz Zafón",
+      "pages": 569,
+      "rating": 3.0,
+      "review": "7/10.<br/><br/>I read this book the summer after I finished high school. I decided to reread it this year to see how it held up 6 years later (d@mn). To my surprise, I rate it the exact same.<br/><br/>It has an extremely strong and captivating start, muddled with spells that are uninteresting or somewhat tedious.  Despite being almost 600 pages long, the final act seems very rushed. The writing at many points feels very cheesy too.<br/><br/>Regardless, it’s a good story. I would have trimmed may..."
+    },
+    "shortest_book": {
+      "title": "El pozo",
+      "author": "Juan Carlos Onetti",
+      "pages": 96,
+      "rating": 3.0,
+      "review": "Great writing, confusing and with some unlikeable narrator moments. I need to reread it before EOY. "
+    }
+  },
+  "Highest and Lowest Rated": {
+    "highest_rated": [
+      {
+        "Title": "The Namesake",
+        "Author": "Jhumpa Lahiri",
+        "My Rating": 5.0,
+        "My Review": "I’ve been reading books recommended to me by people I love (most recently my grandpa, dad, and now my mom) in an effort to get to know them better, to understand the things they love and admire.<br/><br/>This book is beautiful. The narration is perfect, at no point giving the feeling of it dragging on. Similarly, the story evokes a variety of complex emotions, always managing to make you feel like these experiences are yours (or at least related to you). <br/><br/>This is a book I will forever d..."
+      },
+      {
+        "Title": "Cloud Atlas",
+        "Author": "David Mitchell",
+        "My Rating": 5.0,
+        "My Review": "Not only is it a beautifully written book, a masterpiece of narration and writing styles, but it is one of the most unique premises ever. I am so happy I decided to reread this after almost half a decade. Without a doubt, this is one of the best books I have ever read. A marvel of literature.<br/><br/>100/10. "
+      },
+      {
+        "Title": "Pachinko",
+        "Author": "Min Jin Lee",
+        "My Rating": 5.0,
+        "My Review": "One of the best books I have ever read. The captivating storytelling across generations is unlike anything else I’ve ever seen. I cared for every single character, and every single character felt alive and unique. At no point whatsoever did I get bored of the book, or think that something could have been better. <br/><br/>The book captivated me, shocked me, and left me wanting to start all over again. I felt like I was about to tear up at times. <br/><br/>Without a doubt, this is a masterpiece a..."
+      }
+    ],
+    "lowest_rated": [
+      {
+        "Title": "Nocturno de Chile",
+        "Author": "Roberto Bolaño",
+        "My Rating": 2.0,
+        "My Review": "Awful read for the most part. There’s some glimpses of brilliance but it’s unbearable to read most of the time. Infuriating and convoluted. I understand that the story is the rambling of a man with a fever near his death, but d@mn. <br/><br/>I’ve read stupid books that I’ve rated the same. This is not a stupid book. This is a hell of a grind with very little reward. "
+      },
+      {
+        "Title": "Mexican Gothic",
+        "Author": "Silvia Moreno-Garcia",
+        "My Rating": 2.0,
+        "My Review": "5-5.5/10<br/><br/>The premise is really interesting until you discover what is truly going on. Then it’s just stupid. <br/><br/>The writing at many points tries to be dramatic in a way that reads like a teenage novel. In general it lacks depth, both in prose and general storytelling. <br/><br/>A lot of things are not explained—that’s fine, usually, but here it just seems like they truly didn’t know how to and decided to just end the book while shrugging “eh who knows, right?” <br/><br/>Would nev..."
+      },
+      {
+        "Title": "The Temple of Dawn (The Sea of Fertility, #3)",
+        "Author": "Yukio Mishima",
+        "My Rating": 2.0,
+        "My Review": "The only thing that saved this book from being ranked as 1 star is the amazing start and ~80 ish first pages. After that, it’s countless chapters of yapping, weird horny moments, and down right weird parts that would simply not fly in the last 3 decades almost anywhere in the world.<br/><br/>It’s a shame. The first book is a masterpiece. The second one is really good. But you can see the sharp decline in this one. I’ll still finish the tetralogy at some point this year, but definitely disappoint..."
+      },
+      {
+        "Title": "Things Fall Apart (The African Trilogy, #1)",
+        "Author": "Chinua Achebe",
+        "My Rating": 2.0,
+        "My Review": "I decided to reread this with the hopes that I could appreciate it more than my high school self did. And I did! But still not enough.<br/><br/>The world building is great and the story itself is really interesting. However, the writing style was just not for me. A lot of times it really was a h@ssle to keep reading.<br/><br/>The ending of the book is really strong though. <br/><br/>Overall, 5/10, maybe a 6. <br/>"
+      }
+    ]
+  },
+  "Monthly Rating Distribution": {
+    "2024-01": {
+      "distribution": {
+        "2": 0,
+        "3": 3,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-02": {
+      "distribution": {
+        "2": 0,
+        "3": 0,
+        "4": 0,
+        "5": 1
+      },
+      "average": 5.0
+    },
+    "2024-03": {
+      "distribution": {
+        "2": 0,
+        "3": 1,
+        "4": 1,
+        "5": 0
+      },
+      "average": 3.5
+    },
+    "2024-04": {
+      "distribution": {
+        "2": 1,
+        "3": 0,
+        "4": 2,
+        "5": 0
+      },
+      "average": 3.3333333333333335
+    },
+    "2024-05": {
+      "distribution": {
+        "2": 0,
+        "3": 1,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-06": {
+      "distribution": {
+        "2": 1,
+        "3": 1,
+        "4": 0,
+        "5": 1
+      },
+      "average": 3.3333333333333335
+    },
+    "2024-07": {
+      "distribution": {
+        "2": 0,
+        "3": 1,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-08": {
+      "distribution": {
+        "2": 0,
+        "3": 2,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-09": {
+      "distribution": {
+        "2": 0,
+        "3": 1,
+        "4": 0,
+        "5": 0
+      },
+      "average": 3.0
+    },
+    "2024-10": {
+      "distribution": {
+        "2": 1,
+        "3": 1,
+        "4": 0,
+        "5": 0
+      },
+      "average": 2.5
+    },
+    "2024-11": {
+      "distribution": {
+        "2": 1,
+        "3": 0,
+        "4": 1,
+        "5": 1
+      },
+      "average": 3.6666666666666665
+    }
+  },
+  "Top Books Summary": [
+    {
+      "title": "Pachinko",
+      "author": "Min Jin Lee",
+      "rating": 5,
+      "pages": 537,
+      "date_read": "2024-02-22"
+    },
+    {
+      "title": "Cloud Atlas",
+      "author": "David Mitchell",
+      "rating": 5,
+      "pages": 509,
+      "date_read": "2024-06-29"
+    },
+    {
+      "title": "The Namesake",
+      "author": "Jhumpa Lahiri",
+      "rating": 5,
+      "pages": 305,
+      "date_read": "2024-11-28"
+    },
+    {
+      "title": "Runaway Horses",
+      "author": "Yukio Mishima",
+      "rating": 4,
+      "pages": 421,
+      "date_read": "2024-04-10"
+    },
+    {
+      "title": "The Left Hand of Darkness",
+      "author": "Ursula K. Le Guin",
+      "rating": 4,
+      "pages": 367,
+      "date_read": "2024-11-11"
+    }
+  ],
+  "All Books Read": [
+    {
+      "title": "The Namesake",
+      "author": "Jhumpa Lahiri",
+      "rating": 5.0,
+      "pages": 305,
+      "date_read": "2024-11-28",
+      "review": "I’ve been reading books recommended to me by people I love (most recently my grandpa, dad, and now my mom) in an effort to get to know them better, to understand the things they love and admire.<br/><br/>This book is beautiful. The narration is perfect, at no point giving the feeling of it dragging on. Similarly, the story evokes a variety of complex emotions, always managing to make you feel like these experiences are yours (or at least related to you). <br/><br/>This is a book I will forever d...",
+      "isbn": "=\"0547429312\"",
+      "year_published": 2004,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/0547429312-L.jpg"
+    },
+    {
+      "title": "Nocturno de Chile",
+      "author": "Roberto Bolaño",
+      "rating": 2.0,
+      "pages": 152,
+      "date_read": "2024-11-19",
+      "review": "Awful read for the most part. There’s some glimpses of brilliance but it’s unbearable to read most of the time. Infuriating and convoluted. I understand that the story is the rambling of a man with a fever near his death, but d@mn. <br/><br/>I’ve read stupid books that I’ve rated the same. This is not a stupid book. This is a hell of a grind with very little reward. ",
+      "isbn": "=\"8433924648\"",
+      "year_published": 2000,
+      "cover_url": "https://books.google.com/books/content?id=6T0dAQAAIAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+    },
+    {
+      "title": "The Left Hand of Darkness",
+      "author": "Ursula K. Le Guin",
+      "rating": 4.0,
+      "pages": 367,
+      "date_read": "2024-11-11",
+      "review": "One of the most unique premises I’ve ever read. An interesting look from an outsider into a world without binary gender norms, war, crazy cold temperatures, and interesting political conflicts. <br/><br/>Not the easiest read but a book that I’ll look back at fondly. ",
+      "isbn": "=\"\"",
+      "year_published": 2000,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/-L.jpg"
+    },
+    {
+      "title": "The Spinoza Problem",
+      "author": "Irvin D. Yalom",
+      "rating": 3.0,
+      "pages": 338,
+      "date_read": "2024-10-25",
+      "review": "6.5-7/10<br/><br/>In a nutshell, although the first third of the book is fully captivating from both characters, the rest of the book loses its appeal from the Spinoza side. The dialogues feel eternal and often obtuse. They fail to enact his principles and his teachings in the same effective way the first third of the book did. <br/><br/>The first 30 percent of the book is great. 40-70% through, the book slows down and it definitely felt like I needed to power through. The final 30% was enjoyabl...",
+      "isbn": "=\"\"",
+      "year_published": 2012,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/-L.jpg"
+    },
+    {
+      "title": "Mexican Gothic",
+      "author": "Silvia Moreno-Garcia",
+      "rating": 2.0,
+      "pages": 320,
+      "date_read": "2024-10-01",
+      "review": "5-5.5/10<br/><br/>The premise is really interesting until you discover what is truly going on. Then it’s just stupid. <br/><br/>The writing at many points tries to be dramatic in a way that reads like a teenage novel. In general it lacks depth, both in prose and general storytelling. <br/><br/>A lot of things are not explained—that’s fine, usually, but here it just seems like they truly didn’t know how to and decided to just end the book while shrugging “eh who knows, right?” <br/><br/>Would nev...",
+      "isbn": "=\"\"",
+      "year_published": 2020,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/-L.jpg"
+    },
+    {
+      "title": "The Little Stranger",
+      "author": "Sarah Waters",
+      "rating": 3.0,
+      "pages": 512,
+      "date_read": "2024-09-11",
+      "review": "6.5/10<br/><br/>The book has its highs and lows. You can review by percentage sections of the book:<br/><br/>0-40%: super interesting and gripping mystery. You wonder if there is some malicious entity at play (this is not a spoiler). This is the first peak.<br/> <br/>40-60%: lowkey boring, but you could argue it sets up the final act (which is underwhelming too).<br/><br/>60-80%: again very interesting, the story continues and the mystery increases. Another great peak.<br/><br/>80-95%: the prota...",
+      "isbn": "=\"\"",
+      "year_published": 2010,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/-L.jpg"
+    },
+    {
+      "title": "On the Shortness of Life: Life Is Long if You Know How to Use It",
+      "author": "Seneca",
+      "rating": 3.0,
+      "pages": 106,
+      "date_read": "2024-08-27",
+      "review": "“It is not that we have a short space of time, but that we waste much of it.”<br/><br/>That’s the gist of the book, and it’s timelessly true.<br/>",
+      "isbn": "=\"0143036327\"",
+      "year_published": 2005,
+      "cover_url": "https://books.google.com/books/content?id=bo9PEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+    },
+    {
+      "title": "La casa de los espíritus",
+      "author": "Isabel Allende",
+      "rating": 3.0,
+      "pages": 454,
+      "date_read": "2024-08-26",
+      "review": "Torn between a 5.5 or a 6/10. It is clear that I didn’t enjoy it as much as others have, though.<br/><br/>I really enjoyed the beginning parts, especially when detailing the love of Rosa and Esteban. I also enjoyed everything relating to Las Tres Marías: Esteban’s attempts at fixing it, the conflicts, and overall stories that stemmed from that environment. I think Allende shined when creating this setting and the life within it. This includes the story of Satigny.<br/><br/><br/>Apart from that, ...",
+      "isbn": "=\"8401423023\"",
+      "year_published": 1999,
+      "cover_url": null
+    },
+    {
+      "title": "The Elegance of the Hedgehog",
+      "author": "Muriel Barbery",
+      "rating": 3.0,
+      "pages": 325,
+      "date_read": "2024-07-15",
+      "review": "It was alright? The story is good, for the most part. Often times I find that it’s a long and ongoing ramble. Maybe that does it for some people. Wouldn’t reread. ",
+      "isbn": "=\"1933372605\"",
+      "year_published": 2008,
+      "cover_url": "https://books.google.com/books/content?id=EtZMnwEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+    },
+    {
+      "title": "Cloud Atlas",
+      "author": "David Mitchell",
+      "rating": 5.0,
+      "pages": 509,
+      "date_read": "2024-06-29",
+      "review": "Not only is it a beautifully written book, a masterpiece of narration and writing styles, but it is one of the most unique premises ever. I am so happy I decided to reread this after almost half a decade. Without a doubt, this is one of the best books I have ever read. A marvel of literature.<br/><br/>100/10. ",
+      "isbn": "=\"0375507256\"",
+      "year_published": 2004,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/0375507256-L.jpg"
+    },
+    {
+      "title": "The Temple of Dawn",
+      "author": "Yukio Mishima",
+      "rating": 2.0,
+      "pages": 352,
+      "date_read": "2024-06-11",
+      "review": "The only thing that saved this book from being ranked as 1 star is the amazing start and ~80 ish first pages. After that, it’s countless chapters of yapping, weird horny moments, and down right weird parts that would simply not fly in the last 3 decades almost anywhere in the world.<br/><br/>It’s a shame. The first book is a masterpiece. The second one is really good. But you can see the sharp decline in this one. I’ll still finish the tetralogy at some point this year, but definitely disappoint...",
+      "isbn": "=\"0679722424\"",
+      "year_published": 1990,
+      "cover_url": "https://books.google.com/books/content?id=Nwjii3-IdukC&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+    },
+    {
+      "title": "La historia interminable",
+      "author": "Michael Ende",
+      "rating": 3.0,
+      "pages": 510,
+      "date_read": "2024-06-02",
+      "review": "7/10<br/><br/>First half of the book is a really cool and well-written meta story. IMO the strongest part of the book.<br/><br/>The second half is a series of tales, loosely leading somewhere, which, although interesting, could have been 100-150 pages shorter—but then you wouldn’t have 26 chapters starting with the corresponding letter from the alphabet.<br/><br/>My cousin said it best: it’s the sort of book you can read to your kids, where each chapter is enough of a story, for them to fall asl...",
+      "isbn": "=\"8466318305\"",
+      "year_published": 2010,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/8466318305-L.jpg"
+    },
+    {
+      "title": "La sombra del viento",
+      "author": "Carlos Ruiz Zafón",
+      "rating": 3.0,
+      "pages": 569,
+      "date_read": "2024-05-21",
+      "review": "7/10.<br/><br/>I read this book the summer after I finished high school. I decided to reread it this year to see how it held up 6 years later (d@mn). To my surprise, I rate it the exact same.<br/><br/>It has an extremely strong and captivating start, muddled with spells that are uninteresting or somewhat tedious.  Despite being almost 600 pages long, the final act seems very rushed. The writing at many points feels very cheesy too.<br/><br/>Regardless, it’s a good story. I would have trimmed may...",
+      "isbn": "=\"0307472590\"",
+      "year_published": 2009,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/0307472590-L.jpg"
+    },
+    {
+      "title": "Things Fall Apart",
+      "author": "Chinua Achebe",
+      "rating": 2.0,
+      "pages": 209,
+      "date_read": "2024-04-22",
+      "review": "I decided to reread this with the hopes that I could appreciate it more than my high school self did. And I did! But still not enough.<br/><br/>The world building is great and the story itself is really interesting. However, the writing style was just not for me. A lot of times it really was a h@ssle to keep reading.<br/><br/>The ending of the book is really strong though. <br/><br/>Overall, 5/10, maybe a 6. <br/>",
+      "isbn": "=\"0385474547\"",
+      "year_published": 2017,
+      "cover_url": "https://books.google.com/books/content?id=-fmfprdtL0EC&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+    },
+    {
+      "title": "Come Closer",
+      "author": "Sara Gran",
+      "rating": 4.0,
+      "pages": 168,
+      "date_read": "2024-04-11",
+      "review": "Gripping and very interesting. Would recommend. ",
+      "isbn": "=\"1641295244\"",
+      "year_published": 2023,
+      "cover_url": "https://books.google.com/books/content?id=JS2yEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+    },
+    {
+      "title": "Runaway Horses",
+      "author": "Yukio Mishima",
+      "rating": 4.0,
+      "pages": 421,
+      "date_read": "2024-04-10",
+      "review": "Runaway Horses shares the same narrative moments of brilliance as Spring Snow, with details tying both novels together in a subtle yet powerful manner. <br/><br/>The theme of reincarnation is further elaborated on, having been set up first in Spring Snow, yet never too over the top. <br/><br/>There were moments in which I found myself skimming through some pages, which I didn’t find myself doing as much in Spring Snow. The story here is also less simple, and instead deals with heavier political ...",
+      "isbn": "=\"0679722408\"",
+      "year_published": 1990,
+      "cover_url": "https://books.google.com/books/content?id=dqqOEAAAQBAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+    },
+    {
+      "title": "Zero: The Biography of a Dangerous Idea",
+      "author": "Charles Seife",
+      "rating": 3.0,
+      "pages": 248,
+      "date_read": "2024-03-18",
+      "review": "In reality, this is a 5/10 but for some reason half a star still isn’t a feature in Goodreads.<br/><br/>To be succinct: it feels like the author needed to reach a page or word count. <br/><br/>In detail:<br/>The book struggles to pick between diving deeper into mathematical intricacies or glancing over subjects rapidly. It never does either enough, and does both pretty poorly. Who is the target audience supposed to be? It’s at times too technical for someone who is not into math, yet too shallow...",
+      "isbn": "=\"0140296476\"",
+      "year_published": 2000,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/0140296476-L.jpg"
+    },
+    {
+      "title": "Last Summer in the City",
+      "author": "Gianfranco Calligarich",
+      "rating": 4.0,
+      "pages": 192,
+      "date_read": "2024-03-04",
+      "review": "It starts off strong and then somewhat flattens out in the middle. It can be described as a bleaker, more mature vibe to the narrator of “Catcher in the Rye” and his mentality. <br/><br/>The ending is powerful. Before the last 10 pages, I was ready to give it a 6.5-7/10. After I finished it though, it easily merits a 7.5-8/10. <br/><br/>Worth the read, in my opinion. <br/><br/>“I was dealt my cards and I played them.” ",
+      "isbn": "=\"0374600155\"",
+      "year_published": 2021,
+      "cover_url": "https://books.google.com/books/content?id=p4K_zQEACAAJ&printsec=frontcover&img=1&zoom=1&source=gbs_api"
+    },
+    {
+      "title": "Pachinko",
+      "author": "Min Jin Lee",
+      "rating": 5.0,
+      "pages": 537,
+      "date_read": "2024-02-22",
+      "review": "One of the best books I have ever read. The captivating storytelling across generations is unlike anything else I’ve ever seen. I cared for every single character, and every single character felt alive and unique. At no point whatsoever did I get bored of the book, or think that something could have been better. <br/><br/>The book captivated me, shocked me, and left me wanting to start all over again. I felt like I was about to tear up at times. <br/><br/>Without a doubt, this is a masterpiece a...",
+      "isbn": "=\"178669137X\"",
+      "year_published": 2017,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/178669137X-L.jpg"
+    },
+    {
+      "title": "El pozo",
+      "author": "Juan Carlos Onetti",
+      "rating": 3.0,
+      "pages": 96,
+      "date_read": "2024-01-28",
+      "review": "Great writing, confusing and with some unlikeable narrator moments. I need to reread it before EOY. ",
+      "isbn": "=\"8466320393\"",
+      "year_published": 2007,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/8466320393-L.jpg"
+    },
+    {
+      "title": "Never Let Me Go",
+      "author": "Kazuo Ishiguro",
+      "rating": 3.0,
+      "pages": 272,
+      "date_read": "2024-01-25",
+      "review": "I’d give it a 7/10. The concept is interesting, and most of the times the writing feels vivid. I cant seem to like Ruth, although maybe once or twice I do empathize with her. I liked Tommy and Kath’s friendship. <br/><br/>Overall, not a lot happens in terms of “story completion”. They just lived their life and Katy narrates it. Again, enjoyable, but not sure if I’d read it again. <br/><br/>",
+      "isbn": "=\"\"",
+      "year_published": 2005,
+      "cover_url": "https://covers.openlibrary.org/b/isbn/-L.jpg"
+    },
+    {
+      "title": "Shame",
+      "author": "Salman Rushdie",
+      "rating": 3.0,
+      "pages": 320,
+      "date_read": "2024-01-15",
+      "review": "It has some great parts and it has some slow parts. U fortunately, the former does not outweigh the latter.<br/><br/>I found myself disliking the narrator at times. <br/><br/>Overall, the story was interesting, but I would say that everything good about this book is done better in Midnight’s Children. <br/><br/>Maybe I’ll reread it in some years and find newfound joy and appreciation. Not for now though. ",
+      "isbn": "=\"0312270933\"",
+      "year_published": 2000,
+      "cover_url": null
+    }
+  ]
+}

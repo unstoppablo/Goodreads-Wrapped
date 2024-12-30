@@ -7,59 +7,145 @@ from typing import Dict,Optional
 import time
 import requests
 import math
+import aiohttp
+import asyncio
+import ssl
+import urllib
 
-
-
-def get_book_cover(isbn: str) -> Optional[str]:
+async def check_image_size(url: str, session: aiohttp.ClientSession, ssl_context) -> bool:
     """
-    Retrieve book cover URL using multiple APIs, trying them in order until success.
+    Check if an image URL returns a valid-sized image (> 1KB)
     """
-    start_time = time.time()
-
-    if not isbn or pd.isna(isbn):
-        print(f"Skipping cover fetch - Invalid ISBN: {isbn}")
-        return None
-        
-    # Clean ISBN - remove Excel formatting, hyphens, and spaces
-    isbn = str(isbn).replace('="', '').replace('"', '').replace('-', '').replace(' ', '')
-    print(f"Attempting cover fetch for ISBN: {isbn}")
-    
-    # 1. Try Open Library API first
-    openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
-    
     try:
-        response = requests.head(openlibrary_url, timeout=5)
-        print(f"OpenLibrary response status: {response.status_code}")
-        print(f"OpenLibrary content length: {response.headers.get('content-length', 0)}")
+        async with session.head(url, timeout=5, ssl=ssl_context) as response:
+            if response.status == 200:
+                content_length = int(response.headers.get('content-length', 0))
+                return content_length > 1000  # Minimum 1KB size
+    except Exception as e:
+        print(f"Error checking image size for {url}: {str(e)}")
+    return False
+
+async def get_book_cover_async(isbn: str, title: str, author: str, session: aiohttp.ClientSession) -> Optional[str]:
+    """
+    Asynchronously retrieve book cover URL using multiple APIs, with title fallback and size verification
+    """
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    
+    # First try by ISBN if available
+    if isbn and not pd.isna(isbn):
+        isbn = str(isbn).strip().replace('="', '').replace('"', '').replace('-', '').replace(' ', '')
         
-        if response.status_code == 200 and int(response.headers.get('content-length', 0)) > 1000:
-            print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (OpenLibrary success)")
+        # Try Open Library API with small image size
+        openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg"
+        if await check_image_size(openlibrary_url, session, ssl_context):
             return openlibrary_url
-    except Exception as e:
-        print(f"OpenLibrary error: {str(e)}")
-    
-    # 2. Try Google Books API as fallback
-    try:
-        google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-        response = requests.get(google_url, timeout=5)
-        print(f"Google Books response status: {response.status_code}")
         
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('items'):
-                image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
-                for size in ['thumbnail', 'smallThumbnail']:
-                    if size in image_links:
-                        print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (Google Books success)")
-                        return image_links[size]
-            print("Google Books response contained no image links")
-    except Exception as e:
-        print(f"Google Books error: {str(e)}")
+        # Try Google Books API
+        try:
+            google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&fields=items(volumeInfo(imageLinks))"
+            async with session.get(google_url, timeout=5, ssl=ssl_context) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get('items'):
+                        image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                        for size in ['thumbnail', 'smallThumbnail']:  # Try both sizes, verify each
+                            if size in image_links:
+                                img_url = image_links[size].replace('http://', 'https://')
+                                if await check_image_size(img_url, session, ssl_context):
+                                    return img_url
+        except Exception as e:
+            print(f"Google Books error for ISBN {isbn}: {str(e)}")
     
-    print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (No cover found)")
+    # If no cover found by ISBN, try by title + author
+    if title and not pd.isna(title):
+        title = title.strip()
+        author = str(author).strip() if author and not pd.isna(author) else ""
+        search_query = f"{title} {author}".strip()
+        
+        try:
+            # Try Google Books API with title + author
+            google_url = f"https://www.googleapis.com/books/v1/volumes?q={search_query}&fields=items(volumeInfo(imageLinks))"
+            async with session.get(google_url, timeout=5, ssl=ssl_context) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get('items'):
+                        image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                        for size in ['thumbnail', 'smallThumbnail']:
+                            if size in image_links:
+                                img_url = image_links[size].replace('http://', 'https://')
+                                if await check_image_size(img_url, session, ssl_context):
+                                    return img_url
+        except Exception as e:
+            print(f"Google Books error for title search '{search_query}': {str(e)}")
+        
+        try:
+            # Try Open Library API with title search
+            encoded_title = urllib.parse.quote(title)
+            openlibrary_search_url = f"https://openlibrary.org/search.json?title={encoded_title}&fields=cover_i"
+            async with session.get(openlibrary_search_url, timeout=5, ssl=ssl_context) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get('docs') and len(data['docs']) > 0 and data['docs'][0].get('cover_i'):
+                        cover_id = data['docs'][0]['cover_i']
+                        img_url = f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
+                        if await check_image_size(img_url, session, ssl_context):
+                            return img_url
+        except Exception as e:
+            print(f"Open Library error for title search '{title}': {str(e)}")
+    
     return None
 
-
+async def get_covers_batch(books: list[dict]) -> Dict[str, Optional[str]]:
+    """
+    Fetch multiple book covers concurrently and log results
+    """
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    
+    conn = aiohttp.TCPConnector(ssl=ssl_context)
+    async with aiohttp.ClientSession(connector=conn) as session:
+        tasks = []
+        for book in books:
+            if book:  # Only process non-None books
+                tasks.append(get_book_cover_async(
+                    isbn=book.get('isbn'),
+                    title=book.get('title'),
+                    author=book.get('author'),
+                    session=session
+                ))
+            else:
+                print(f"Skipping invalid book entry")
+                tasks.append(None)
+                
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        cover_urls = {}
+        for book, result in zip(books, results):
+            if not book:
+                continue
+                
+            isbn = book.get('isbn')
+            title = book.get('title')
+            
+            if isinstance(result, Exception):
+                print(f"Error fetching cover for book '{title}' (ISBN: {isbn}): {str(result)}")
+                cover_urls[isbn] = None
+            elif result is None:
+                print(f"No cover found for book '{title}' (ISBN: {isbn})")
+                cover_urls[isbn] = None
+            else:
+                print(f"Successfully retrieved cover for book '{title}' (ISBN: {isbn}): {result}")
+                cover_urls[isbn] = result
+                
+        print(f"\nSummary:")
+        print(f"Total books processed: {len(books)}")
+        print(f"Successful retrievals: {len([url for url in cover_urls.values() if url is not None])}")
+        print(f"Failed retrievals: {len([url for url in cover_urls.values() if url is None])}")
+        
+        return cover_urls
 
 class GoodreadsDataProcessor:
     def __init__(self, csv_path):
@@ -247,35 +333,41 @@ class GoodreadsDataProcessor:
 
     def get_all_books_read(self, start_date=None, end_date=None):
         """
-        Get details for all books read in the specified period
-        Returns: List of dictionaries containing book details
+        Get details for all books read in the specified period with concurrent cover fetching
         """
         df_period = self._filter_date_range(start_date, end_date)
-        
-        # Sort by date read (descending)
         sorted_books = df_period.sort_values('Date Read', ascending=False)
         
+        # Prepare books data for cover fetching
+        books_data = []
+        for _, row in sorted_books.iterrows():
+            book = {
+                'isbn': row['ISBN'] if pd.notna(row['ISBN']) else None,
+                'title': self._clean_title(row['Title']) if pd.notna(row['Title']) else None,
+                'author': row['Author'] if pd.notna(row['Author']) else None
+            }
+            books_data.append(book)
+        
+        # Fetch covers for all books
+        cover_urls = asyncio.run(get_covers_batch(books_data))
+        
+        # Process all books with their covers
         processed_books = []
         for _, row in sorted_books.iterrows():
-            # Fetch cover URL with rate limiting
-            cover_url = get_book_cover(row['ISBN'] if pd.notna(row['ISBN']) else None)
-            
+            isbn = row['ISBN'] if pd.notna(row['ISBN']) else None
             book_data = {
                 'title': self._clean_title(row['Title']),
                 'author': row['Author'],
                 'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
-                "pages": int(float(row['Number of Pages'])) if pd.notna(row['Number of Pages']) else None,
+                'pages': int(float(row['Number of Pages'])) if pd.notna(row['Number of Pages']) else None,
                 'date_read': row['Date Read'].strftime('%Y-%m-%d'),
                 'review': self._clean_review_text(row['My Review']) if pd.notna(row['My Review']) else None,
-                'isbn': row['ISBN'] if pd.notna(row['ISBN']) else None,
+                'isbn': isbn,
                 'year_published': int(row['Year Published']) if pd.notna(row['Year Published']) else None,
-                'cover_url': cover_url
+                'cover_url': cover_urls.get(isbn)
             }
             processed_books.append(book_data)
-            
-            # Add delay between API calls to avoid rate limiting
-            time.sleep(0.5)
-            
+        
         return processed_books
 
 
