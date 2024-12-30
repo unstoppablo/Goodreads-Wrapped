@@ -1,5 +1,7 @@
-import React, { useState } from "react";
-import { Upload, AlertCircle, Loader2 } from "lucide-react";
+// InstructionPage.jsx
+import React, { useState, useEffect } from "react";
+import { Upload, AlertCircle, Loader2, BookOpen, Sparkles } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import instructionsImage from "../media/Instructions.jpeg";
@@ -9,6 +11,20 @@ const InstructionPage = ({ onPageComplete }) => {
   const [error, setError] = useState("");
   const [isValidating, setIsValidating] = useState(false);
   const [isValidated, setIsValidated] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [analysisError, setAnalysisError] = useState(null);
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    let progressInterval;
+    if (isAnalyzing) {
+      progressInterval = setInterval(() => {
+        setProgress((prev) => Math.min(prev + 2, 95));
+      }, 400);
+    }
+    return () => clearInterval(progressInterval);
+  }, [isAnalyzing]);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -25,28 +41,123 @@ const InstructionPage = ({ onPageComplete }) => {
   };
 
   const validateFile = async (file) => {
-    setIsValidating(true);
     try {
-      // Here you would call your Python validation script
-      // For now, simulating validation with a timeout
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setIsValidated(true);
-      setError("");
+      setIsValidating(true);
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const API_BASE_URL =
+        import.meta.env.VITE_API_BASE_URL || "http://192.168.0.19:5001";
+      const response = await fetch(`${API_BASE_URL}/validate`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok)
+        throw new Error(`HTTP error! status: ${response.status}`);
+
+      const result = await response.json();
+
+      if (result.status) {
+        setIsValidated(true);
+        setError("");
+        // Remove automatic handleProceed call
+      } else {
+        setError(result.error || "Invalid Goodreads file");
+        setIsValidated(false);
+      }
     } catch (err) {
-      setError(
-        "Invalid file format. Please ensure this is a Goodreads export file."
-      );
+      setError("Validation failed. Please try again.");
       setIsValidated(false);
     } finally {
       setIsValidating(false);
     }
   };
 
-  const handleProceed = () => {
-    if (isValidated) {
-      onPageComplete();
+  const handleProceed = async () => {
+    if (isValidated && file) {
+      try {
+        setIsAnalyzing(true);
+        setProgress(0);
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        // const API_BASE_URL =
+        //   import.meta.env.VITE_API_BASE_URL || "http://192.168.50.232:5001";
+
+        const API_BASE_URL =
+          import.meta.env.VITE_API_BASE_URL || "http://192.168.0.19:5001";
+
+        const response = await fetch(`${API_BASE_URL}/analyze`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+
+        const result = await response.json();
+
+        if (result === "No books found in the specified date range.") {
+          setAnalysisError("No books found in the specified date range.");
+          setProgress(0);
+          return;
+        }
+
+        setProgress(100);
+        setIsReady(true);
+        onPageComplete(result);
+      } catch (err) {
+        setAnalysisError(err.message);
+        setProgress(0);
+      }
     }
   };
+
+  if (isAnalyzing) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 w-full max-w-lg mx-auto space-y-8">
+        <div className="text-2xl md:text-3xl font-bold text-center flex items-center justify-center gap-3 text-white">
+          <BookOpen className="w-8 h-8 animate-pulse" />
+          {analysisError ? "Analysis Failed" : "Analyzing your books..."}
+        </div>
+
+        <div className="w-full h-3 bg-white/10 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-white transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+
+        {analysisError ? (
+          <>
+            <p className="text-red-500 text-center">{analysisError}</p>
+            <button
+              onClick={() => {
+                setIsAnalyzing(false);
+                setAnalysisError(null);
+              }}
+              className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg transition-all duration-300"
+            >
+              Try Again
+            </button>
+          </>
+        ) : (
+          <p className="text-white text-center">
+            {isReady ? (
+              <span className="flex items-center justify-center gap-2">
+                <Sparkles className="w-5 h-5" />
+                Analysis complete!
+              </span>
+            ) : (
+              "This will take about a minute..."
+            )}
+          </p>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 w-full max-w-lg mx-auto space-y-8">
@@ -109,20 +220,20 @@ const InstructionPage = ({ onPageComplete }) => {
       </div>
 
       {error && (
-        <Alert
-          variant="destructive"
-          className="bg-red-900/50 border-red-500/50"
-        >
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription className="text-white">{error}</AlertDescription>
-        </Alert>
+        <div className="w-full max-w-sm text-red-500 text-center">{error}</div>
       )}
 
       <Button
         onClick={handleProceed}
         disabled={!file || !isValidated || isValidating}
         className={`w-full max-w-sm ${
-          isValidated ? "bg-blue-600 hover:bg-blue-700" : ""
+          isValidating
+            ? "bg-gray-600 hover:bg-gray-700"
+            : isValidated
+            ? "bg-blue-600 hover:bg-blue-700"
+            : file
+            ? "bg-red-600 hover:bg-red-700"
+            : ""
         }`}
       >
         {!file ? (
@@ -132,6 +243,8 @@ const InstructionPage = ({ onPageComplete }) => {
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Validating...
           </>
+        ) : !isValidated ? (
+          "Invalid CSV"
         ) : (
           "Proceed"
         )}

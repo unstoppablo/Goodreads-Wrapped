@@ -3,11 +3,12 @@ from datetime import datetime
 import numpy as np
 import re
 import json
-from typing import Dict, List, Any, Optional
-from collections import defaultdict
+from typing import Dict,Optional
 import time
 import requests
 import math
+
+
 
 def get_book_cover(isbn: str) -> Optional[str]:
     """
@@ -16,26 +17,32 @@ def get_book_cover(isbn: str) -> Optional[str]:
     start_time = time.time()
 
     if not isbn or pd.isna(isbn):
+        print(f"Skipping cover fetch - Invalid ISBN: {isbn}")
         return None
         
-    # Clean ISBN - remove hyphens and spaces
-    isbn = str(isbn).replace('-', '').replace(' ', '')
+    # Clean ISBN - remove Excel formatting, hyphens, and spaces
+    isbn = str(isbn).replace('="', '').replace('"', '').replace('-', '').replace(' ', '')
+    print(f"Attempting cover fetch for ISBN: {isbn}")
     
     # 1. Try Open Library API first
     openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
     
     try:
-        response = requests.head(openlibrary_url)
+        response = requests.head(openlibrary_url, timeout=5)
+        print(f"OpenLibrary response status: {response.status_code}")
+        print(f"OpenLibrary content length: {response.headers.get('content-length', 0)}")
+        
         if response.status_code == 200 and int(response.headers.get('content-length', 0)) > 1000:
             print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (OpenLibrary success)")
             return openlibrary_url
-    except:
-        pass
+    except Exception as e:
+        print(f"OpenLibrary error: {str(e)}")
     
     # 2. Try Google Books API as fallback
     try:
         google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-        response = requests.get(google_url)
+        response = requests.get(google_url, timeout=5)
+        print(f"Google Books response status: {response.status_code}")
         
         if response.status_code == 200:
             data = response.json()
@@ -45,25 +52,24 @@ def get_book_cover(isbn: str) -> Optional[str]:
                     if size in image_links:
                         print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (Google Books success)")
                         return image_links[size]
-    except:
-        pass
+            print("Google Books response contained no image links")
+    except Exception as e:
+        print(f"Google Books error: {str(e)}")
+    
     print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (No cover found)")
-
     return None
 
 
 
 class GoodreadsDataProcessor:
     def __init__(self, csv_path):
-        """Initialize with path to CSV file"""
         self.df = pd.read_csv(csv_path)
         self._process_dates()
         
     def _process_dates(self):
-        """Convert date strings to datetime objects"""
         date_columns = ['Date Read', 'Date Added']
         for col in date_columns:
-            self.df[col] = pd.to_datetime(self.df[col], format='%m/%d/%y', errors='coerce')
+            self.df[col] = pd.to_datetime(self.df[col], format='%Y/%m/%d', errors='coerce')
     
     def _clean_title(self, title):
         """
@@ -120,6 +126,71 @@ class GoodreadsDataProcessor:
             review = re.sub(re.compile(word, re.IGNORECASE), replacement, review)
             
         return review
+
+
+    def validate_goodreads_csv(self):
+        """
+        Validate Goodreads CSV file for required columns and basic data integrity
+        
+        Args:
+            csv_path (str): Path to the CSV file
+        
+        Returns:
+            dict: Validation results with status and error messages
+        """
+        try:
+            
+            # Required columns for basic processing
+            required_columns = [
+                'Title', 'Author', 'My Rating', 'Number of Pages', 
+                'Date Read', 'Exclusive Shelf', 'ISBN', 
+                'Year Published', 'My Review'
+            ]
+            
+            # Check for required columns
+            missing_columns = [col for col in required_columns if col not in self.df.columns]
+            if missing_columns:
+                return {
+                    'status': False, 
+                    'error': f'Missing required columns: {", ".join(missing_columns)}'
+                }
+            
+            # Basic data integrity checks
+            # Check if any rows exist
+            if len(self.df) == 0:
+                return {
+                    'status': False, 
+                    'error': 'CSV file is empty'
+                }
+            
+            # Check for read books
+            read_books = self.df[self.df['Exclusive Shelf'] == 'read']
+            if len(read_books) == 0:
+                return {
+                    'status': False, 
+                    'error': 'No books marked as "read" found'
+                }
+            
+            # Date parsing check
+            try:
+                pd.to_datetime(self.df['Date Read'], format='%m/%d/%y', errors='raise')
+            except:
+                return {
+                    'status': False, 
+                    'error': 'Invalid date format in "Date Read" column'
+                }
+            
+            return {
+                'status': True,
+                'total_books': len(self.df),
+                'read_books': len(read_books)
+            }
+        
+        except Exception as e:
+            return {
+                'status': False, 
+                'error': f'Validation error: {str(e)}'
+            }
 
     def get_monthly_rating_distribution(self, start_date=None, end_date=None):
         """
@@ -235,8 +306,13 @@ class GoodreadsDataProcessor:
         return average_days_per_book
 
     def get_statistics(self, start_date=None, end_date=None):
-        """Get all statistics for the specified date range"""
         df_period = self._filter_date_range(start_date, end_date)
+        
+        print("Total rows in dataframe:", len(self.df))
+        print("Date range:", start_date, "to", end_date)
+        print("Books in period:", len(df_period))
+        print("Sample of dates:", self.df['Date Read'].head())
+        print("Sample of filtered dates:", df_period['Date Read'].head())
         
         if len(df_period) == 0:
             return "No books found in the specified date range."

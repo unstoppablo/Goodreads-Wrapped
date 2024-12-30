@@ -12,23 +12,28 @@ import ReadingPercentile from "./pages/ReadingPercentile";
 import CoolStats from "./pages/CoolStats";
 import BookTrends from "./pages/BookTrends";
 import InstructionPage from "./pages/InstructionPage";
-import LoadingPage from "./pages/LoadingPage";
 
-const Main = ({ data }) => {
+const Main = () => {
+  const [data, setData] = useState(null);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageCompletionStatus, setPageCompletionStatus] = useState([]);
+
+  const handleInstructionComplete = (result) => {
+    setData(result);
+    setCurrentPageIndex(1);
+  };
 
   const pages = [
     {
       title: "",
       id: "instructions",
-      component: InstructionPage,
-    },
-    {
-      title: "",
-      id: "loading",
-      component: LoadingPage,
+      component: (props) => (
+        <InstructionPage
+          {...props}
+          onPageComplete={handleInstructionComplete}
+        />
+      ),
     },
     {
       title: "",
@@ -122,17 +127,17 @@ const Main = ({ data }) => {
   };
 
   const goToNextPage = () => {
+    if (!data && currentPageIndex === 0) return; // Block navigation on instructions until data exists
     setCurrentPageIndex((prev) =>
       prev === pages.length - 1 ? prev : prev + 1
     );
   };
 
   const goToPrevPage = () => {
+    if (!data && currentPageIndex === 0) return;
     if (currentPageIndex > 0) {
-      // Only proceed if we're not on the first page
       const newIndex = currentPageIndex - 1;
       setCurrentPageIndex(newIndex);
-      // Reset completion status for all pages after the one we're moving to
       setPageCompletionStatus((prev) => {
         const newStatus = [...prev];
         for (let i = newIndex + 1; i < newStatus.length; i++) {
@@ -189,34 +194,35 @@ const Main = ({ data }) => {
       {/* Main Content */}
       <div className="relative z-10 w-full h-screen flex flex-col items-center">
         {/* Progress dots */}
-        <div className="fixed top-8 left-0 right-0 flex justify-center gap-1 md:gap-2">
-          {pages.map((page, index) => (
-            <div
-              key={`${page.id}-${index}`}
-              className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full relative overflow-hidden transition-colors
-        ${
-          index === currentPageIndex
-            ? ["fav_month_books", "top_books", "worst_books"].includes(page.id)
-              ? "bg-green-500"
-              : "bg-blue-400"
-            : pageCompletionStatus[index]
-            ? "bg-green-500"
-            : "bg-gray-700"
-        }`}
-            >
-              {/* Completion animation bar */}
-              {pageCompletionStatus[index] && (
-                <div
-                  className="absolute left-0 top-0 h-full w-full bg-green-500 origin-left animate-progress-fill"
-                  style={{
-                    animationDuration: "1s",
-                    transformOrigin: "left",
-                  }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+        {currentPageIndex > 0 && (
+          <div className="fixed top-8 left-0 right-0 flex justify-center gap-1 md:gap-2">
+            {pages.slice(1).map((page, index) => (
+              <div
+                key={`${page.id}-${index}`}
+                className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full relative overflow-hidden transition-colors
+     ${
+       index + 1 === currentPageIndex
+         ? ["fav_month_books", "top_books", "worst_books"].includes(page.id)
+           ? "bg-green-500"
+           : "bg-blue-400"
+         : pageCompletionStatus[index + 1]
+         ? "bg-green-500"
+         : "bg-gray-700"
+     }`}
+              >
+                {pageCompletionStatus[index + 1] && (
+                  <div
+                    className="absolute left-0 top-0 h-full w-full bg-green-500 origin-left animate-progress-fill"
+                    style={{
+                      animationDuration: "1s",
+                      transformOrigin: "left",
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Page Content */}
         <div className="flex-1 w-full flex items-center justify-center px-4">
@@ -227,15 +233,15 @@ const Main = ({ data }) => {
           )}
 
           <div className="w-full text-white">
-            {CurrentPage ? (
+            {CurrentPage && data ? (
               <CurrentPage
                 data={data}
                 onPageComplete={() => markPageAsCompleted(currentPageIndex)}
               />
             ) : (
-              <p className="text-gray-400 text-center">
-                Content coming soon...
-              </p>
+              <CurrentPage
+                onPageComplete={() => markPageAsCompleted(currentPageIndex)}
+              />
             )}
           </div>
         </div>
