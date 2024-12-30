@@ -194,34 +194,35 @@ const Main = () => {
       {/* Main Content */}
       <div className="relative z-10 w-full h-screen flex flex-col items-center">
         {/* Progress dots */}
-        <div className="fixed top-8 left-0 right-0 flex justify-center gap-1 md:gap-2">
-          {pages.map((page, index) => (
-            <div
-              key={`${page.id}-${index}`}
-              className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full relative overflow-hidden transition-colors
-        ${
-          index === currentPageIndex
-            ? ["fav_month_books", "top_books", "worst_books"].includes(page.id)
-              ? "bg-green-500"
-              : "bg-blue-400"
-            : pageCompletionStatus[index]
-            ? "bg-green-500"
-            : "bg-gray-700"
-        }`}
-            >
-              {/* Completion animation bar */}
-              {pageCompletionStatus[index] && (
-                <div
-                  className="absolute left-0 top-0 h-full w-full bg-green-500 origin-left animate-progress-fill"
-                  style={{
-                    animationDuration: "1s",
-                    transformOrigin: "left",
-                  }}
-                />
-              )}
-            </div>
-          ))}
-        </div>
+        {currentPageIndex > 0 && (
+          <div className="fixed top-8 left-0 right-0 flex justify-center gap-1 md:gap-2">
+            {pages.slice(1).map((page, index) => (
+              <div
+                key={`${page.id}-${index}`}
+                className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full relative overflow-hidden transition-colors
+     ${
+       index + 1 === currentPageIndex
+         ? ["fav_month_books", "top_books", "worst_books"].includes(page.id)
+           ? "bg-green-500"
+           : "bg-blue-400"
+         : pageCompletionStatus[index + 1]
+         ? "bg-green-500"
+         : "bg-gray-700"
+     }`}
+              >
+                {pageCompletionStatus[index + 1] && (
+                  <div
+                    className="absolute left-0 top-0 h-full w-full bg-green-500 origin-left animate-progress-fill"
+                    style={{
+                      animationDuration: "1s",
+                      transformOrigin: "left",
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Page Content */}
         <div className="flex-1 w-full flex items-center justify-center px-4">

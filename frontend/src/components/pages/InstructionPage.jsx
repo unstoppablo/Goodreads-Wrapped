@@ -47,7 +47,7 @@ const InstructionPage = ({ onPageComplete }) => {
       formData.append("file", file);
 
       const API_BASE_URL =
-        import.meta.env.VITE_API_BASE_URL || "http://192.168.50.232:5001";
+        import.meta.env.VITE_API_BASE_URL || "http://192.168.0.19:5001";
       const response = await fetch(`${API_BASE_URL}/validate`, {
         method: "POST",
         body: formData,
@@ -83,8 +83,11 @@ const InstructionPage = ({ onPageComplete }) => {
         const formData = new FormData();
         formData.append("file", file);
 
+        // const API_BASE_URL =
+        //   import.meta.env.VITE_API_BASE_URL || "http://192.168.50.232:5001";
+
         const API_BASE_URL =
-          import.meta.env.VITE_API_BASE_URL || "http://192.168.50.232:5001";
+          import.meta.env.VITE_API_BASE_URL || "http://192.168.0.19:5001";
 
         const response = await fetch(`${API_BASE_URL}/analyze`, {
           method: "POST",
@@ -224,7 +227,9 @@ const InstructionPage = ({ onPageComplete }) => {
         onClick={handleProceed}
         disabled={!file || !isValidated || isValidating}
         className={`w-full max-w-sm ${
-          isValidated
+          isValidating
+            ? "bg-gray-600 hover:bg-gray-700"
+            : isValidated
             ? "bg-blue-600 hover:bg-blue-700"
             : file
             ? "bg-red-600 hover:bg-red-700"

@@ -51,7 +51,7 @@ const BookExtremes = ({ data, type = "longest" }) => {
   };
 
   const getTitle = () => {
-    return type === "longest" ? "Your Longest Book" : "Your Shortest Book";
+    return type === "longest" ? "Your longest Book" : "Your shortest Book";
   };
 
   return (
