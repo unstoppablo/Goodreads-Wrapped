@@ -7,58 +7,152 @@ from typing import Dict,Optional
 import time
 import requests
 import math
+import aiohttp
+import asyncio
+import ssl
+import urllib
 
-
-
-def get_book_cover(isbn: str) -> Optional[str]:
+async def check_image_size(url: str, session: aiohttp.ClientSession, ssl_context) -> bool:
     """
-    Retrieve book cover URL using multiple APIs, trying them in order until success.
+    Check if an image URL returns a valid-sized image (> 1KB)
     """
-    start_time = time.time()
+    try:
+        async with session.head(url, timeout=5, ssl=ssl_context) as response:
+            if response.status == 200:
+                content_length = int(response.headers.get('content-length', 0))
+                return content_length > 1000  # Minimum 1KB size
+    except Exception as e:
+        print(f"Error checking image size for {url}: {str(e)}")
+    return False
 
-    if not isbn or pd.isna(isbn):
-        print(f"Skipping cover fetch - Invalid ISBN: {isbn}")
-        return None
+async def get_book_cover_async(isbn: str, title: str, author: str, session: aiohttp.ClientSession) -> Optional[str]:
+    """
+    Asynchronously retrieve book cover URL, with better ISBN validation
+    """
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    
+    # Better ISBN validation - check for actual ISBN content
+    if isbn and not pd.isna(isbn) and isbn != '=""':
+        isbn = str(isbn).strip().replace('="', '').replace('"', '').replace('-', '').replace(' ', '')
+        if isbn:  # Make sure we still have content after cleaning
+            # Try Google Books API with ISBN
+            try:
+                google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&fields=items(volumeInfo(imageLinks))"
+                async with session.get(google_url, timeout=5, ssl=ssl_context) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        if data.get('items'):
+                            image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                            for size in ['thumbnail', 'smallThumbnail']:
+                                if size in image_links:
+                                    img_url = image_links[size].replace('http://', 'https://')
+                                    if await check_image_size(img_url, session, ssl_context):
+                                        return img_url
+            except Exception as e:
+                print(f"Google Books error for ISBN {isbn}: {str(e)}")
+            
+            # Try Open Library API with ISBN
+            openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg"
+            if await check_image_size(openlibrary_url, session, ssl_context):
+                return openlibrary_url
+    
+    # If no valid ISBN or no cover found, try title + author search
+    if title and not pd.isna(title):
+        title = title.strip()
+        author = str(author).strip() if author and not pd.isna(author) else ""
+        search_query = f"{title} {author}".strip()
         
-    # Clean ISBN - remove Excel formatting, hyphens, and spaces
-    isbn = str(isbn).replace('="', '').replace('"', '').replace('-', '').replace(' ', '')
-    print(f"Attempting cover fetch for ISBN: {isbn}")
-    
-    # 1. Try Open Library API first
-    openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-L.jpg"
-    
-    try:
-        response = requests.head(openlibrary_url, timeout=5)
-        print(f"OpenLibrary response status: {response.status_code}")
-        print(f"OpenLibrary content length: {response.headers.get('content-length', 0)}")
+        try:
+            google_url = f"https://www.googleapis.com/books/v1/volumes?q={urllib.parse.quote(search_query)}&fields=items(volumeInfo(imageLinks))"
+            async with session.get(google_url, timeout=5, ssl=ssl_context) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get('items'):
+                        image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                        for size in ['thumbnail', 'smallThumbnail']:
+                            if size in image_links:
+                                img_url = image_links[size].replace('http://', 'https://')
+                                if await check_image_size(img_url, session, ssl_context):
+                                    return img_url
+        except Exception as e:
+            print(f"Google Books error for title search '{search_query}': {str(e)}")
         
-        if response.status_code == 200 and int(response.headers.get('content-length', 0)) > 1000:
-            print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (OpenLibrary success)")
-            return openlibrary_url
-    except Exception as e:
-        print(f"OpenLibrary error: {str(e)}")
+        # Try Open Library with title search as last resort
+        try:
+            encoded_title = urllib.parse.quote(title)
+            openlibrary_search_url = f"https://openlibrary.org/search.json?title={encoded_title}&fields=cover_i"
+            async with session.get(openlibrary_search_url, timeout=5, ssl=ssl_context) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    if data.get('docs') and len(data['docs']) > 0 and data['docs'][0].get('cover_i'):
+                        cover_id = data['docs'][0]['cover_i']
+                        img_url = f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
+                        if await check_image_size(img_url, session, ssl_context):
+                            return img_url
+        except Exception as e:
+            print(f"Open Library error for title search '{title}': {str(e)}")
     
-    # 2. Try Google Books API as fallback
-    try:
-        google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}"
-        response = requests.get(google_url, timeout=5)
-        print(f"Google Books response status: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('items'):
-                image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
-                for size in ['thumbnail', 'smallThumbnail']:
-                    if size in image_links:
-                        print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (Google Books success)")
-                        return image_links[size]
-            print("Google Books response contained no image links")
-    except Exception as e:
-        print(f"Google Books error: {str(e)}")
-    
-    print(f"Cover fetch took: {time.time() - start_time:.2f} seconds (No cover found)")
     return None
 
+async def get_covers_batch(books: list[dict]) -> Dict[str, Optional[str]]:
+    """
+    Fetch multiple book covers concurrently and log results
+    Returns a dictionary with book identifier (title + author) as key
+    """
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    
+    conn = aiohttp.TCPConnector(ssl=ssl_context)
+    async with aiohttp.ClientSession(connector=conn) as session:
+        tasks = []
+        valid_books = []
+        
+        for book in books:
+            if book and (book.get('isbn') or book.get('title')):
+                tasks.append(get_book_cover_async(
+                    isbn=book.get('isbn'),
+                    title=book.get('title'),
+                    author=book.get('author'),
+                    session=session
+                ))
+                valid_books.append(book)
+            else:
+                print(f"Skipping invalid book entry (missing both ISBN and title)")
+                
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        cover_urls = {}
+        successful = 0
+        failed = 0
+        
+        for book, result in zip(valid_books, results):
+            # Create a unique identifier using title and author
+            book_id = f"{book.get('title', '')}__{book.get('author', '')}"
+            isbn = book.get('isbn')
+            title = book.get('title', 'Unknown Title')
+            
+            if isinstance(result, Exception):
+                print(f"Error fetching cover for book '{title}' (ISBN: {isbn}): {str(result)}")
+                cover_urls[book_id] = None
+                failed += 1
+            elif result is None:
+                print(f"No cover found for book '{title}' (ISBN: {isbn})")
+                cover_urls[book_id] = None
+                failed += 1
+            else:
+                print(f"Successfully retrieved cover for book '{title}' (ISBN: {isbn}): {result}")
+                cover_urls[book_id] = result
+                successful += 1
+                
+        print(f"\nSummary:")
+        print(f"Total books processed: {len(valid_books)}")
+        print(f"Successful retrievals: {successful}")
+        print(f"Failed retrievals: {failed}")
+        
+        return cover_urls
 
 
 class GoodreadsDataProcessor:
@@ -247,35 +341,45 @@ class GoodreadsDataProcessor:
 
     def get_all_books_read(self, start_date=None, end_date=None):
         """
-        Get details for all books read in the specified period
-        Returns: List of dictionaries containing book details
+        Get details for all books read in the specified period with concurrent cover fetching
         """
         df_period = self._filter_date_range(start_date, end_date)
-        
-        # Sort by date read (descending)
         sorted_books = df_period.sort_values('Date Read', ascending=False)
         
+        # Prepare books data for cover fetching
+        books_data = []
+        for _, row in sorted_books.iterrows():
+            book = {
+                'isbn': row['ISBN'] if pd.notna(row['ISBN']) else None,
+                'title': self._clean_title(row['Title']) if pd.notna(row['Title']) else None,
+                'author': row['Author'] if pd.notna(row['Author']) else None
+            }
+            books_data.append(book)
+        
+        # Fetch covers for all books
+        cover_urls = asyncio.run(get_covers_batch(books_data))
+        
+        # Process all books with their covers
         processed_books = []
         for _, row in sorted_books.iterrows():
-            # Fetch cover URL with rate limiting
-            cover_url = get_book_cover(row['ISBN'] if pd.notna(row['ISBN']) else None)
+            title = self._clean_title(row['Title'])
+            author = row['Author']
+            # Use the same book identifier as in get_covers_batch
+            book_id = f"{title}__{author}"
             
             book_data = {
-                'title': self._clean_title(row['Title']),
-                'author': row['Author'],
+                'title': title,
+                'author': author,
                 'rating': float(row['My Rating']) if row['My Rating'] > 0 else None,
-                "pages": int(float(row['Number of Pages'])) if pd.notna(row['Number of Pages']) else None,
+                'pages': int(float(row['Number of Pages'])) if pd.notna(row['Number of Pages']) else None,
                 'date_read': row['Date Read'].strftime('%Y-%m-%d'),
                 'review': self._clean_review_text(row['My Review']) if pd.notna(row['My Review']) else None,
                 'isbn': row['ISBN'] if pd.notna(row['ISBN']) else None,
                 'year_published': int(row['Year Published']) if pd.notna(row['Year Published']) else None,
-                'cover_url': cover_url
+                'cover_url': cover_urls.get(book_id)
             }
             processed_books.append(book_data)
-            
-            # Add delay between API calls to avoid rate limiting
-            time.sleep(0.5)
-            
+        
         return processed_books
 
 
@@ -308,31 +412,27 @@ class GoodreadsDataProcessor:
     def get_statistics(self, start_date=None, end_date=None):
         df_period = self._filter_date_range(start_date, end_date)
         
-        print("Total rows in dataframe:", len(self.df))
-        print("Date range:", start_date, "to", end_date)
-        print("Books in period:", len(df_period))
-        print("Sample of dates:", self.df['Date Read'].head())
-        print("Sample of filtered dates:", df_period['Date Read'].head())
-        
         if len(df_period) == 0:
             return "No books found in the specified date range."
 
+        # Get all books first (includes covers)
+        all_books = self.get_all_books_read(start_date, end_date)
+        # Create a mapping of title to cover URL
+        cover_url_map = {book['title']: book['cover_url'] for book in all_books}
 
-        # Calculate reading hours
-        reading_hours = (df_period['Number of Pages'].sum() * 2.5) / 60  # Assuming 2.5 mins per page
-        reading_days = reading_hours / 24  
-
+        # Rest of your existing stats calculations...
+        reading_hours = (df_period['Number of Pages'].sum() * 2.5) / 60
+        reading_days = reading_hours / 24
+        
         # Convert books_per_month Period objects to strings
         books_per_month = (
             df_period['Date Read']
             .dt.to_period('M')
             .value_counts()
             .sort_index()
-            .apply(lambda x: int(x))  # Convert count to int
+            .apply(lambda x: int(x))
             .to_dict()
         )
-        
-        # Convert Period index to string
         books_per_month = {str(k): v for k, v in books_per_month.items()}
 
         stats = {
@@ -361,25 +461,28 @@ class GoodreadsDataProcessor:
             
             "Time_Comparisons": self._get_time_comparisons(reading_hours),
             
+            # Update Book_Extremes to include cover URLs
             "Book_Extremes": {
                 "longest_book": {
                     "title": self._clean_title(df_period.loc[df_period['Number of Pages'].idxmax(), 'Title']),
                     "author": df_period.loc[df_period['Number of Pages'].idxmax(), 'Author'],
                     "pages": int(df_period['Number of Pages'].max()),
                     "rating": float(df_period.loc[df_period['Number of Pages'].idxmax(), 'My Rating']),
-                    "review": self._clean_review_text(df_period.loc[df_period['Number of Pages'].idxmax(), 'My Review'])
+                    "review": self._clean_review_text(df_period.loc[df_period['Number of Pages'].idxmax(), 'My Review']),
+                    "cover_url": cover_url_map.get(self._clean_title(df_period.loc[df_period['Number of Pages'].idxmax(), 'Title']))
                 },
                 "shortest_book": {
                     "title": self._clean_title(df_period.loc[df_period['Number of Pages'].idxmin(), 'Title']),
                     "author": df_period.loc[df_period['Number of Pages'].idxmin(), 'Author'],
                     "pages": int(df_period['Number of Pages'].min()),
                     "rating": float(df_period.loc[df_period['Number of Pages'].idxmin(), 'My Rating']),
-                    "review": self._clean_review_text(df_period.loc[df_period['Number of Pages'].idxmin(), 'My Review'])
+                    "review": self._clean_review_text(df_period.loc[df_period['Number of Pages'].idxmin(), 'My Review']),
+                    "cover_url": cover_url_map.get(self._clean_title(df_period.loc[df_period['Number of Pages'].idxmin(), 'Title']))
                 }
             }
         }
-        
-        # Update highest and lowest rated to include cleaned reviews
+
+        # Update with high/low ratings
         high_rated = df_period[df_period['My Rating'] == df_period['My Rating'].max()]
         low_rated = df_period[df_period['My Rating'] == df_period['My Rating'].min()]
         
@@ -399,10 +502,11 @@ class GoodreadsDataProcessor:
             } for _, row in low_rated.iterrows()]
         }
 
+        # Add the remaining sections
         stats.update({
             "Monthly Rating Distribution": self.get_monthly_rating_distribution(start_date, end_date),
             "Top Books Summary": self.get_top_books_summary(start_date, end_date),
-            "All Books Read": self.get_all_books_read(start_date, end_date)  # New section added
+            "All Books Read": all_books  # Already includes cover URLs
         })
         
         return stats
