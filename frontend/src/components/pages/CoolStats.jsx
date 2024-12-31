@@ -56,7 +56,8 @@ export const CoolStats = ({ data, onPageComplete }) => {
   const [isComplete, setIsComplete] = useState(false);
 
   useEffect(() => {
-    const timings = [3000, 8700, 9700, 6000];
+    // Reduced initial timings while maintaining overall duration for each section
+    const timings = [2000, 8000, 9700, 6000];
 
     if (currentStage < 4) {
       const timer = setTimeout(() => {
@@ -124,7 +125,7 @@ export const CoolStats = ({ data, onPageComplete }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{
-                    delay: index === 0 ? 1.5 : index === 1 ? 3.8 : 6.1,
+                    delay: index === 0 ? 1.0 : index === 1 ? 2.0 : 3.0,
                   }}
                   className="text-4xl md:text-6xl font-bold text-white text-center leading-tight"
                 >
@@ -155,7 +156,7 @@ export const CoolStats = ({ data, onPageComplete }) => {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{
-                    delay: index === 0 ? 1.5 : index === 1 ? 3.8 : 6.1,
+                    delay: index === 0 ? 1.0 : index === 1 ? 2.0 : 3.0,
                   }}
                   className="text-4xl md:text-6xl font-bold text-white text-center leading-tight"
                 >
