@@ -18,7 +18,7 @@ const BookListing = ({
     .filter((book) => {
       if (!month) return true;
       const bookDate = new Date(book.date_read);
-      return bookDate.getMonth() === month - 1;
+      return bookDate.getMonth() === month - 1; // Leave it as month
     })
     .sort((a, b) =>
       sortOrder === "desc" ? b.rating - a.rating : a.rating - b.rating
@@ -45,6 +45,7 @@ const BookListing = ({
 
   const getMonthName = (monthNum) => {
     const date = new Date();
+    date.setDate(1); // Set to 1st of the month FIRST
     date.setMonth(monthNum - 1);
     return date.toLocaleString("default", { month: "long" });
   };

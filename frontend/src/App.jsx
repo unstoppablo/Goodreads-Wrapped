@@ -1,5 +1,4 @@
 import Main from "./components/Main";
-import readingData from "./data/reading_stats_2024.json";
 import "./App.css";
 
 function App() {
