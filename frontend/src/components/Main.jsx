@@ -15,13 +15,52 @@ import InstructionPage from "./pages/InstructionPage";
 import ProgressDots from "./animations/ProgressDots";
 
 const Main = () => {
-  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [data, setData] = useState(() => {
+    // Try to get cached data on initial load
+    const cached = localStorage.getItem("analysisData");
+    if (cached) {
+      try {
+        const { data, timestamp } = JSON.parse(cached);
+        const timeDiff = Date.now() - timestamp;
+        const minutesOld = Math.floor(timeDiff / 60000);
+
+        if (timeDiff < 5 * 60 * 1000) {
+          console.log(`📋 Found valid cache (${minutesOld} minutes old)`);
+          return data;
+        } else {
+          console.log(`🕒 Cache expired (${minutesOld} minutes old)`);
+          localStorage.removeItem("analysisData");
+        }
+      } catch (e) {
+        console.log("❌ Invalid cache found, removing");
+        localStorage.removeItem("analysisData");
+      }
+    } else {
+      console.log("📭 No cache found");
+    }
+    return null;
+  });
+
+  // Set loading false after initial check
+  useEffect(() => {
+    setIsLoading(false);
+  }, []);
+
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [currentPageIndex, setCurrentPageIndex] = useState(0);
   const [pageCompletionStatus, setPageCompletionStatus] = useState([]);
 
   const handleInstructionComplete = (result) => {
     setData(result);
+    console.log("💾 Caching new analysis data");
+    localStorage.setItem(
+      "analysisData",
+      JSON.stringify({
+        data: result,
+        timestamp: Date.now(),
+      })
+    );
     setCurrentPageIndex(1);
   };
 
@@ -186,6 +225,20 @@ const Main = () => {
     }
   }, [currentPageIndex]);
 
+  useEffect(() => {
+    if (currentPageIndex === pages.length - 1) {
+      console.log("🧹 Clearing cache at end of experience");
+      localStorage.removeItem("analysisData");
+    }
+  }, [currentPageIndex, pages.length]);
+
+  if (isLoading) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-gray-950">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-white"></div>
+      </div>
+    );
+  }
   return (
     <div className="w-full min-h-screen relative overflow-hidden bg-gray-950">
       {/* Background Video */}
