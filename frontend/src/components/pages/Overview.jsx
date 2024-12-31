@@ -6,7 +6,7 @@ const containerVariants = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 1.8, // Increased stagger time between items
+      staggerChildren: 0.8, // Reduced stagger time between items
       delayChildren: 0.3, // Slight initial delay
     },
   },
@@ -24,7 +24,7 @@ const itemVariants = {
     opacity: 1,
     x: 0,
     transition: {
-      duration: 0.7, // Slightly longer duration for each item
+      duration: 0.5, // Slightly faster duration for each item
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -67,7 +67,7 @@ const Overview = ({ data, onPageComplete }) => {
   const [showStats, setShowStats] = useState(false);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowStats(true), 200);
+    const timer = setTimeout(() => setShowStats(true), 100);
     return () => clearTimeout(timer);
   }, []);
 

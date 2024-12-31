@@ -59,7 +59,7 @@ const GoodbyePage = ({ onPageComplete }) => {
         {currentStage === 2 && (
           <motion.div key="ready" {...fadeInUp} className="text-center">
             <p className="max-w-2xl text-3xl md:text-5xl font-bold text-center leading-tight">
-              Here's a shareable summary of your reading journey this year 😃
+              Here's a final summary of your reading journey this year 😃
             </p>
           </motion.div>
         )}

@@ -97,15 +97,7 @@ const ReadingPercentile = ({ data, onPageComplete }) => {
                 <span className="bg-gradient-to-br from-white to-gray-300 bg-clip-text text-transparent">
                   {formatNumber(hours)} hours reading
                 </span>{" "}
-                <motion.span
-                  initial="initial"
-                  animate="animate"
-                  variants={shakeEmoji}
-                  className="inline-block"
-                  style={{ display: "inline-block" }}
-                >
-                  😯
-                </motion.span>
+                <p> 😯</p>
               </motion.div>
             </div>
           </motion.div>

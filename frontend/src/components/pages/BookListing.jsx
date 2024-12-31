@@ -160,7 +160,7 @@ const BookListing = ({
 
   return (
     <motion.div
-      className="space-y-8"
+      className="space-y-8 max-w-2xl mx-auto"
       variants={listContainerVariants}
       initial="hidden"
       animate="visible"

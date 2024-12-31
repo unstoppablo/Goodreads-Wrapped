@@ -12,6 +12,7 @@ import ReadingPercentile from "./pages/ReadingPercentile";
 import CoolStats from "./pages/CoolStats";
 import BookTrends from "./pages/BookTrends";
 import InstructionPage from "./pages/InstructionPage";
+import ProgressDots from "./animations/ProgressDots";
 
 const Main = () => {
   const [data, setData] = useState(null);
@@ -112,6 +113,24 @@ const Main = () => {
     },
   ];
 
+  const pageDurations = {
+    intro: 9000,
+    overview: 5000,
+    percentiles: 6000,
+    fun_facts: 12000,
+    cool_stats: 25700,
+    avg_ratings: 7000,
+    fav_month: 5000,
+    goodbye_message: 10000,
+    // Pages that complete instantly
+    fav_month_books: 0,
+    longest_book: 0,
+    shortest_book: 0,
+    top_books: 0,
+    worst_books: 0,
+    final_page: 0,
+  };
+
   // Initialize page completion status when component mounts
   useEffect(() => {
     setPageCompletionStatus(new Array(pages.length).fill(false));
@@ -195,33 +214,12 @@ const Main = () => {
       <div className="relative z-10 w-full h-screen flex flex-col items-center">
         {/* Progress dots */}
         {currentPageIndex > 0 && (
-          <div className="fixed top-8 left-0 right-0 flex justify-center gap-1 md:gap-2">
-            {pages.slice(1).map((page, index) => (
-              <div
-                key={`${page.id}-${index}`}
-                className={`h-1.5 md:h-2 w-6 md:w-8 rounded-full relative overflow-hidden transition-colors
-     ${
-       index + 1 === currentPageIndex
-         ? ["fav_month_books", "top_books", "worst_books"].includes(page.id)
-           ? "bg-green-500"
-           : "bg-blue-400"
-         : pageCompletionStatus[index + 1]
-         ? "bg-green-500"
-         : "bg-gray-700"
-     }`}
-              >
-                {pageCompletionStatus[index + 1] && (
-                  <div
-                    className="absolute left-0 top-0 h-full w-full bg-green-500 origin-left animate-progress-fill"
-                    style={{
-                      animationDuration: "1s",
-                      transformOrigin: "left",
-                    }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
+          <ProgressDots
+            currentPage={currentPageIndex}
+            completionStatus={pageCompletionStatus}
+            pages={pages}
+            pageDurations={pageDurations}
+          />
         )}
 
         {/* Page Content */}

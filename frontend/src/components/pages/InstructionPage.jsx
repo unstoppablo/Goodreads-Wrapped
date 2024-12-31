@@ -1,8 +1,5 @@
-// InstructionPage.jsx
 import React, { useState, useEffect } from "react";
 import { Upload, AlertCircle, Loader2, BookOpen, Sparkles } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import instructionsImage from "../media/Instructions.jpeg";
 
@@ -15,16 +12,46 @@ const InstructionPage = ({ onPageComplete }) => {
   const [progress, setProgress] = useState(0);
   const [analysisError, setAnalysisError] = useState(null);
   const [isReady, setIsReady] = useState(false);
+  const [shouldAnimate, setShouldAnimate] = useState(true);
 
   useEffect(() => {
     let progressInterval;
-    if (isAnalyzing) {
+
+    if (isAnalyzing && shouldAnimate) {
+      // Slower progress increment for more realistic loading
       progressInterval = setInterval(() => {
-        setProgress((prev) => Math.min(prev + 2, 95));
+        setProgress((prev) => {
+          // Slow down as we approach 95%
+          const increment = prev < 50 ? 2 : prev < 80 ? 1 : 0.5;
+          return Math.min(prev + increment, 95);
+        });
       }, 400);
     }
-    return () => clearInterval(progressInterval);
-  }, [isAnalyzing]);
+
+    return () => {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+    };
+  }, [isAnalyzing, shouldAnimate]);
+
+  // Add a new effect to handle completion animation
+  useEffect(() => {
+    if (isReady && progress < 100) {
+      // Quickly fill up to 100% when ready
+      const finalInterval = setInterval(() => {
+        setProgress((prev) => {
+          const newProgress = prev + 2;
+          if (newProgress >= 100) {
+            clearInterval(finalInterval);
+          }
+          return Math.min(newProgress, 100);
+        });
+      }, 50);
+
+      return () => clearInterval(finalInterval);
+    }
+  }, [isReady, progress]);
 
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
@@ -61,7 +88,6 @@ const InstructionPage = ({ onPageComplete }) => {
       if (result.status) {
         setIsValidated(true);
         setError("");
-        // Remove automatic handleProceed call
       } else {
         setError(result.error || "Invalid Goodreads file");
         setIsValidated(false);
@@ -79,12 +105,11 @@ const InstructionPage = ({ onPageComplete }) => {
       try {
         setIsAnalyzing(true);
         setProgress(0);
+        setShouldAnimate(true);
+        setAnalysisError(null);
 
         const formData = new FormData();
         formData.append("file", file);
-
-        // const API_BASE_URL =
-        //   import.meta.env.VITE_API_BASE_URL || "http://192.168.50.232:5001";
 
         const API_BASE_URL =
           import.meta.env.VITE_API_BASE_URL || "http://192.168.0.19:5001";
@@ -100,20 +125,22 @@ const InstructionPage = ({ onPageComplete }) => {
         const result = await response.json();
 
         if (result === "No books found in the specified date range.") {
+          setShouldAnimate(false);
           setAnalysisError("No books found in the specified date range.");
-          setProgress(0);
           return;
         }
 
-        setProgress(100);
         setIsReady(true);
+        // Progress will automatically complete due to the second useEffect
         onPageComplete(result);
       } catch (err) {
+        setShouldAnimate(false);
         setAnalysisError(err.message);
-        setProgress(0);
       }
     }
   };
+
+  // Rest of the component remains the same...
 
   if (isAnalyzing) {
     return (
@@ -137,6 +164,7 @@ const InstructionPage = ({ onPageComplete }) => {
               onClick={() => {
                 setIsAnalyzing(false);
                 setAnalysisError(null);
+                setProgress(0);
               }}
               className="w-full px-6 py-3 bg-red-600 hover:bg-red-700 rounded-lg transition-all duration-300"
             >
