@@ -27,74 +27,74 @@ async def check_image_size(url: str, session: aiohttp.ClientSession, ssl_context
 
 async def get_book_cover_async(isbn: str, title: str, author: str, session: aiohttp.ClientSession) -> Optional[str]:
     """
-    Asynchronously retrieve book cover URL, with better ISBN validation
+    Asynchronously retrieve book cover URL with improved error handling and fallbacks
     """
+    # Configure timeout and SSL context
+    timeout = aiohttp.ClientTimeout(total=10)  # Increased timeout
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
     
-    # Better ISBN validation - check for actual ISBN content
-    if isbn and not pd.isna(isbn) and isbn != '=""':
+    # Add retries for robustness
+    async def fetch_with_retry(url, max_retries=3):
+        for attempt in range(max_retries):
+            try:
+                async with session.get(url, timeout=timeout, ssl=ssl_context) as response:
+                    if response.status == 200:
+                        return await response.json()
+                    elif response.status == 429:  # Rate limit
+                        await asyncio.sleep(2 ** attempt)  # Exponential backoff
+                        continue
+            except Exception as e:
+                if attempt == max_retries - 1:
+                    print(f"Error after {max_retries} attempts for {url}: {str(e)}")
+                await asyncio.sleep(1)
+        return None
+
+    # Clean ISBN
+    if isbn and not pd.isna(isbn):
         isbn = str(isbn).strip().replace('="', '').replace('"', '').replace('-', '').replace(' ', '')
-        if isbn:  # Make sure we still have content after cleaning
-            # Try Google Books API with ISBN
+        
+        if isbn:
+            # Try Google Books API first
             try:
                 google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&fields=items(volumeInfo(imageLinks))"
-                async with session.get(google_url, timeout=5, ssl=ssl_context) as response:
-                    if response.status == 200:
-                        data = await response.json()
-                        if data.get('items'):
-                            image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
-                            for size in ['thumbnail', 'smallThumbnail']:
-                                if size in image_links:
-                                    img_url = image_links[size].replace('http://', 'https://')
-                                    if await check_image_size(img_url, session, ssl_context):
-                                        return img_url
+                data = await fetch_with_retry(google_url)
+                if data and data.get('items'):
+                    image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                    if image_links:
+                        return image_links.get('thumbnail', '').replace('http://', 'https://')
             except Exception as e:
                 print(f"Google Books error for ISBN {isbn}: {str(e)}")
-            
-            # Try Open Library API with ISBN
-            openlibrary_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg"
-            if await check_image_size(openlibrary_url, session, ssl_context):
-                return openlibrary_url
-    
-    # If no valid ISBN or no cover found, try title + author search
+
+            # Fallback to Open Library
+            try:
+                # Try Open Library covers API
+                cover_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg"
+                async with session.head(cover_url, timeout=timeout, ssl=ssl_context) as response:
+                    if response.status == 200:
+                        content_length = int(response.headers.get('content-length', 0))
+                        if content_length > 1000:
+                            return cover_url
+            except Exception as e:
+                print(f"Open Library covers error for ISBN {isbn}: {str(e)}")
+
+    # If no ISBN or no cover found, try title search
     if title and not pd.isna(title):
-        title = title.strip()
-        author = str(author).strip() if author and not pd.isna(author) else ""
-        search_query = f"{title} {author}".strip()
+        search_query = f"{title} {author}".strip() if author and not pd.isna(author) else title.strip()
         
+        # Try Google Books by title
         try:
             google_url = f"https://www.googleapis.com/books/v1/volumes?q={urllib.parse.quote(search_query)}&fields=items(volumeInfo(imageLinks))"
-            async with session.get(google_url, timeout=5, ssl=ssl_context) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if data.get('items'):
-                        image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
-                        for size in ['thumbnail', 'smallThumbnail']:
-                            if size in image_links:
-                                img_url = image_links[size].replace('http://', 'https://')
-                                if await check_image_size(img_url, session, ssl_context):
-                                    return img_url
+            data = await fetch_with_retry(google_url)
+            if data and data.get('items'):
+                image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                if image_links:
+                    return image_links.get('thumbnail', '').replace('http://', 'https://')
         except Exception as e:
             print(f"Google Books error for title search '{search_query}': {str(e)}")
-        
-        # Try Open Library with title search as last resort
-        try:
-            encoded_title = urllib.parse.quote(title)
-            openlibrary_search_url = f"https://openlibrary.org/search.json?title={encoded_title}&fields=cover_i"
-            async with session.get(openlibrary_search_url, timeout=5, ssl=ssl_context) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    if data.get('docs') and len(data['docs']) > 0 and data['docs'][0].get('cover_i'):
-                        cover_id = data['docs'][0]['cover_i']
-                        img_url = f"https://covers.openlibrary.org/b/id/{cover_id}-M.jpg"
-                        if await check_image_size(img_url, session, ssl_context):
-                            return img_url
-        except Exception as e:
-            print(f"Open Library error for title search '{title}': {str(e)}")
-    
-    return None
+
+    return None  # No cover found after all attempts
 
 async def get_covers_batch(books: list[dict]) -> Dict[str, Optional[str]]:
     """
