@@ -14,16 +14,24 @@ import urllib
 
 async def check_image_size(url: str, session: aiohttp.ClientSession, ssl_context) -> bool:
     """
-    Check if an image URL returns a valid-sized image (> 1KB)
+    Check if an image URL returns a valid-sized image
     """
     try:
-        async with session.head(url, timeout=5, ssl=ssl_context) as response:
-            if response.status == 200:
-                content_length = int(response.headers.get('content-length', 0))
-                return content_length > 1000  # Minimum 1KB size
+        # Use GET for Open Library, HEAD for others
+        if 'openlibrary.org' in url:
+            async with session.get(url, timeout=5, ssl=ssl_context) as response:
+                if response.status == 200:
+                    content = await response.read()
+                    return len(content) > 500  # Reduced minimum size
+        else:
+            async with session.head(url, timeout=5, ssl=ssl_context) as response:
+                if response.status == 200:
+                    content_length = int(response.headers.get('content-length', 0))
+                    return content_length > 500  # Reduced minimum size
     except Exception as e:
         print(f"Error checking image size for {url}: {str(e)}")
-    return False
+        print(f"Full error details: {type(e).__name__}")
+        return False
 
 async def get_book_cover_async(isbn: str, title: str, author: str, session: aiohttp.ClientSession) -> Optional[str]:
     """
