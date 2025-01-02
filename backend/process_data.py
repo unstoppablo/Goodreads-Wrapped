@@ -17,10 +17,14 @@ async def check_image_size(url: str, session: aiohttp.ClientSession, ssl_context
     Check if an image URL returns a valid-sized image (> 1KB)
     """
     try:
+        print(f"\nChecking image size for: {url}")
         async with session.head(url, timeout=5, ssl=ssl_context) as response:
+            print(f"Image check status: {response.status}")
             if response.status == 200:
                 content_length = int(response.headers.get('content-length', 0))
+                print(f"Image content length: {content_length}")
                 return content_length > 1000  # Minimum 1KB size
+            print(f"Image check failed with status: {response.status}")
     except Exception as e:
         print(f"Error checking image size for {url}: {str(e)}")
     return False
@@ -29,72 +33,141 @@ async def get_book_cover_async(isbn: str, title: str, author: str, session: aioh
     """
     Asynchronously retrieve book cover URL with improved error handling and fallbacks
     """
+    print(f"\n{'='*50}")
+    print(f"Starting cover search for: {title}")
+    print(f"ISBN: {isbn}")
+    print(f"Author: {author}")
+    print(f"{'='*50}")
+
     # Configure timeout and SSL context
-    timeout = aiohttp.ClientTimeout(total=10)  # Increased timeout
+    timeout = aiohttp.ClientTimeout(total=10)
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
     ssl_context.verify_mode = ssl.CERT_NONE
-    
-    # Add retries for robustness
-    async def fetch_with_retry(url, max_retries=3):
-        for attempt in range(max_retries):
-            try:
-                async with session.get(url, timeout=timeout, ssl=ssl_context) as response:
-                    if response.status == 200:
-                        return await response.json()
-                    elif response.status == 429:  # Rate limit
-                        await asyncio.sleep(2 ** attempt)  # Exponential backoff
-                        continue
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    print(f"Error after {max_retries} attempts for {url}: {str(e)}")
-                await asyncio.sleep(1)
-        return None
 
     # Clean ISBN
     if isbn and not pd.isna(isbn):
         isbn = str(isbn).strip().replace('="', '').replace('"', '').replace('-', '').replace(' ', '')
-        
-        if isbn:
-            # Try Google Books API first
+        print(f"Cleaned ISBN: {isbn}")
+    
+    async def fetch_with_retry(url, max_retries=3):
+        for attempt in range(max_retries):
             try:
-                google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&fields=items(volumeInfo(imageLinks))"
-                data = await fetch_with_retry(google_url)
-                if data and data.get('items'):
-                    image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
-                    if image_links:
-                        return image_links.get('thumbnail', '').replace('http://', 'https://')
+                print(f"\nAttempt {attempt + 1}/{max_retries} for URL: {url}")
+                async with session.get(url, timeout=timeout, ssl=ssl_context) as response:
+                    status = response.status
+                    print(f"Response status: {status}")
+                    
+                    if status == 200:
+                        data = await response.json()
+                        print(f"Success! First 200 chars of response: {str(data)[:200]}...")
+                        return data
+                    elif status == 429:
+                        wait_time = 2 ** attempt
+                        print(f"Rate limit (429) encountered. Waiting {wait_time} seconds...")
+                        await asyncio.sleep(wait_time)
+                        continue
+                    elif status == 403:
+                        print("Forbidden (403) - Likely API quota exceeded")
+                        return None
+                    else:
+                        print(f"Unexpected status code: {status}")
+                        if attempt < max_retries - 1:
+                            print(f"Will retry in {attempt + 1} seconds...")
+                            await asyncio.sleep(attempt + 1)
+                        
+            except asyncio.TimeoutError:
+                print(f"Timeout on attempt {attempt + 1}")
             except Exception as e:
-                print(f"Google Books error for ISBN {isbn}: {str(e)}")
+                print(f"Error on attempt {attempt + 1}: {str(e)}")
+                print(f"Error type: {type(e)}")
+            
+            if attempt < max_retries - 1:
+                print("Retrying...")
+            else:
+                print(f"All {max_retries} attempts failed")
+        return None
 
-            # Fallback to Open Library
-            try:
-                # Try Open Library covers API
-                cover_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg"
-                async with session.head(cover_url, timeout=timeout, ssl=ssl_context) as response:
-                    if response.status == 200:
-                        content_length = int(response.headers.get('content-length', 0))
-                        if content_length > 1000:
-                            return cover_url
-            except Exception as e:
-                print(f"Open Library covers error for ISBN {isbn}: {str(e)}")
+    if isbn:
+        # Try Google Books API first
+        try:
+            print("\nTrying Google Books API with ISBN...")
+            google_url = f"https://www.googleapis.com/books/v1/volumes?q=isbn:{isbn}&fields=items(volumeInfo(imageLinks))"
+            print(f"Google Books URL: {google_url}")
+            data = await fetch_with_retry(google_url)
+            
+            if data and data.get('items'):
+                image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
+                if image_links:
+                    cover_url = image_links.get('thumbnail', '').replace('http://', 'https://')
+                    print(f"Found Google Books cover: {cover_url}")
+                    if await check_image_size(cover_url, session, ssl_context):
+                        print("Google Books cover validated successfully")
+                        return cover_url
+                    else:
+                        print("Google Books cover failed size validation")
+                else:
+                    print("No image links found in Google Books response")
+            else:
+                print("No items found in Google Books response")
+                
+        except Exception as e:
+            print(f"Google Books API error: {str(e)}")
+            print(f"Error type: {type(e)}")
+
+        # Try Open Library covers API
+        try:
+            print("\nTrying Open Library API with ISBN...")
+            cover_url = f"https://covers.openlibrary.org/b/isbn/{isbn}-M.jpg"
+            print(f"Open Library URL: {cover_url}")
+            
+            async with session.head(cover_url, timeout=timeout, ssl=ssl_context) as response:
+                print(f"Open Library response status: {response.status}")
+                if response.status == 200:
+                    content_length = int(response.headers.get('content-length', 0))
+                    print(f"Content length: {content_length}")
+                    if content_length > 1000:
+                        print("Open Library cover validated successfully")
+                        return cover_url
+                    else:
+                        print("Open Library cover too small (likely placeholder)")
+                else:
+                    print(f"Open Library request failed with status: {response.status}")
+                    
+        except Exception as e:
+            print(f"Open Library API error: {str(e)}")
+            print(f"Error type: {type(e)}")
 
     # If no ISBN or no cover found, try title search
-    if title and not pd.isna(title):
-        search_query = f"{title} {author}".strip() if author and not pd.isna(author) else title.strip()
-        
-        # Try Google Books by title
+    if title:
         try:
+            print("\nTrying Google Books API with title search...")
+            search_query = f"{title} {author}".strip() if author else title.strip()
             google_url = f"https://www.googleapis.com/books/v1/volumes?q={urllib.parse.quote(search_query)}&fields=items(volumeInfo(imageLinks))"
+            print(f"Search URL: {google_url}")
+            
             data = await fetch_with_retry(google_url)
             if data and data.get('items'):
                 image_links = data['items'][0].get('volumeInfo', {}).get('imageLinks', {})
                 if image_links:
-                    return image_links.get('thumbnail', '').replace('http://', 'https://')
+                    cover_url = image_links.get('thumbnail', '').replace('http://', 'https://')
+                    print(f"Found cover via title search: {cover_url}")
+                    if await check_image_size(cover_url, session, ssl_context):
+                        print("Title search cover validated successfully")
+                        return cover_url
+                    else:
+                        print("Title search cover failed size validation")
+                else:
+                    print("No image links found in title search response")
+            else:
+                print("No items found in title search response")
+                
         except Exception as e:
-            print(f"Google Books error for title search '{search_query}': {str(e)}")
+            print(f"Title search error: {str(e)}")
+            print(f"Error type: {type(e)}")
 
-    return None  # No cover found after all attempts
+    print("\nNo cover found after trying all methods")
+    return None
 
 async def get_covers_batch(books: list[dict]) -> Dict[str, Optional[str]]:
     """
